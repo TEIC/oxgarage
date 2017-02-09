@@ -1,3 +1,15 @@
+tei-oxgarage (2.10.1+20170209-plos2) trusty; urgency=low
+
+  * new release from upstream
+
+ -- PLOS Aperta Dev Team <apertadevteam@plos.org>  Thu, 09 Feb 2017
+
+tei-oxgarage (2.10.0+20150630-plos1) trusty; urgency=low
+
+  * new release from upstream
+
+ -- PLOS Ops <it-ops@plos.org>  Thu, 21 Apr 2016 09:46:28 -0700
+
 tei-oxgarage (2.3.2) natty; urgency=low
 
   * new release from upstream

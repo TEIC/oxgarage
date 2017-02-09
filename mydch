@@ -1,8 +1,18 @@
 #!/bin/sh
 OLDVERSION=`head -1 $1 | awk '{print $2}' | tr -d '/\(\)/'`
 PACKAGE=`head -1 $1 | awk '{print $1}' `
-NAME=`grep  -- "^ --" $1| head -1 | sed 's/ -- \(.*\)<.*/\1/'`
-EMAIL=`grep  -- "^ --" $1 | head -1 | sed 's/.*<\(.*\)>.*/\1/'`
+if [ -z "$NAME" ]; then
+  echo "\$NAME is not set; using PLOS Ops"
+  NAME="PLOS Ops"
+fi
+if [ -z "$EMAIL" ]; then
+  echo "\$EMAIL is not set; using it-ops@plos.org"
+  EMAIL="it-ops@plos.org"
+fi
+if [ -z "$DIST" ]; then
+  echo "\$DIST is not set; assuming trusty"
+  DIST="trusty"
+fi
 NEWVERSION=`cat VERSION`
 DATE=`date "+%a, %d %b %Y %H:%M:%S %z"`
 if [ $OLDVERSION = $NEWVERSION ]
@@ -10,7 +20,7 @@ then
   echo "version in Debian ($OLDVERSION) is the same as $NEWVERSION"
 else
   echo update with $NEWVERSION
-  echo "$PACKAGE ($NEWVERSION) natty; urgency=low" > /tmp/changelog
+  echo "$PACKAGE ($NEWVERSION) $DIST; urgency=low" > /tmp/changelog
   echo "" >> /tmp/changelog
   echo "  * new release from upstream" >> /tmp/changelog
   echo "" >> /tmp/changelog
