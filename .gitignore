@@ -11,3 +11,14 @@ oo-converter/target
 tei-converter/target
 tei-javalib/target
 Tests/temp-results
+build-stamp
+configure-stamp
+debian-tei-oxgarage/debian/files
+debian-tei-oxgarage/debian/tei-oxgarage.debhelper.log
+debian-tei-oxgarage/debian/tei-oxgarage.substvars
+debian-tei-oxgarage/debian/tei-oxgarage/
+tei-oxgarage*.dsc
+tei-oxgarage*.tar.gz
+tei-oxgarage*.deb
+tei-oxgarage*.build
+tei-oxgarage*.changes

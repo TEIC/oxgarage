@@ -50,7 +50,15 @@ There are a variety of packages which may not be available in Maven repositories
     mvn install:install-file -DgroupId=com.sun.star -DartifactId=ridl  -Dversion=3.2.1 -Dpackaging=jar -Dfile=jod-lib/ridl-3.2.1.jar
     mvn install:install-file -DgroupId=org.apache.commons.cli -DartifactId=commons-cli -Dversion=1.1 -Dpackaging=jar -Dfile=jod-lib/commons-cli-1.1.jar
 
- 
+## Building a Debian Package
+
+edit VERSION to match the version string for the package
+optionally set environment variables:
+  * `NAME` - your full name for use in the Debian changelog (default: "PLOS Aperta Dev Team")
+  * `EMAIL` - your email address for the Debian changelog (default: apertadevteam@plos.org)
+  * `DIST` - the distribution you are building for (default: trusty) 
+  * dpkg-buildpackage -us -uc
+  * commit updated changelog to git
 
 # How does the OxGarage work:
 
