@@ -2,12 +2,12 @@
 OLDVERSION=`head -1 $1 | awk '{print $2}' | tr -d '/\(\)/'`
 PACKAGE=`head -1 $1 | awk '{print $1}' `
 if [ -z "$NAME" ]; then
-  echo "\$NAME is not set; using PLOS Ops"
-  NAME="PLOS Ops"
+  echo "\$NAME is not set; using PLOS Aperta Dev Team"
+  NAME="PLOS Aperta Dev Team"
 fi
 if [ -z "$EMAIL" ]; then
-  echo "\$EMAIL is not set; using it-ops@plos.org"
-  EMAIL="it-ops@plos.org"
+  echo "\$EMAIL is not set; using apertadevteam@plos.org"
+  EMAIL="apertadevteam@plos.org"
 fi
 if [ -z "$DIST" ]; then
   echo "\$DIST is not set; assuming trusty"
