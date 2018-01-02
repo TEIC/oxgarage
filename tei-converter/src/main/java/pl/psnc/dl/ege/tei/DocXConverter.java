@@ -38,9 +38,9 @@ import org.apache.log4j.Logger;
  * Class specifying the .docx document transformation operations.
  * </p>
  * Performs transformation from .docx to TEI XML format and vice versa.
- * 
+ *
  * @author Lukas Platinsky based on code written by mariuszs
- * 
+ *
  */
 
 public class DocXConverter extends ComplexConverter {
@@ -49,7 +49,7 @@ public class DocXConverter extends ComplexConverter {
 
 	/**
 	 * Constructs converter for conversion from TEI
-	 * 
+	 *
 	 * @param profile String representing the profile name
 	 * @throws IOException
 	 * @throws ConfigurationException
@@ -73,7 +73,7 @@ public class DocXConverter extends ComplexConverter {
 		DocumentBuilder documentBuilder = proc.newDocumentBuilder();
 		FileInputStream fis = new FileInputStream(oldStyles);
 		transformer.setInitialContextNode(documentBuilder.build(new StreamSource(fis)));
-		Serializer result = new Serializer();
+		Serializer result = proc.newSerializer();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(newStyles), "UTF-8"));
 		result.setOutputWriter(writer);
@@ -81,9 +81,9 @@ public class DocXConverter extends ComplexConverter {
 		transformer.transform();
 		writer.close();
 		oldStyles.delete();
-		newStyles.renameTo(oldStyles);		
+		newStyles.renameTo(oldStyles);
 		} catch (Exception ex) {
-		    
+
 		    LOGGER.info("EXCEPTION " + ex);
 		}
 
@@ -99,7 +99,7 @@ public class DocXConverter extends ComplexConverter {
 		DocumentBuilder documentBuilder = proc.newDocumentBuilder();
 		FileInputStream fis = new FileInputStream(oldDotrels);
 		transformer.setInitialContextNode(documentBuilder.build(new StreamSource(fis)));
-		Serializer result = new Serializer();
+		Serializer result = proc.newSerializer();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(newDotrels), "UTF-8"));
 		result.setOutputWriter(writer);
@@ -107,18 +107,18 @@ public class DocXConverter extends ComplexConverter {
 		transformer.transform();
 		writer.close();
 		oldDotrels.delete();
-		newDotrels.renameTo(oldDotrels);		
+		newDotrels.renameTo(oldDotrels);
 
 
 		/* show files, debug
 		String files;
 		File folder = new File(tempDirectoryName + File.separator + "word" );
-		File[] listOfFiles = folder.listFiles(); 
-		
-		for (int i = 0; i < listOfFiles.length; i++) 
+		File[] listOfFiles = folder.listFiles();
+
+		for (int i = 0; i < listOfFiles.length; i++)
 		    {
-			
-			if (listOfFiles[i].isFile()) 
+
+			if (listOfFiles[i].isFile())
 			    {
 				files = listOfFiles[i].getName();
 				LOGGER.info(files);
@@ -126,7 +126,7 @@ public class DocXConverter extends ComplexConverter {
 		    }
 		*/
 		} catch (Exception ex) {
-		    
+
 		    LOGGER.info("EXCEPTION " + ex);
 		}
 
@@ -135,7 +135,7 @@ public class DocXConverter extends ComplexConverter {
 
 	/**
 	 * Constructs converter for conversion to TEI
-	 * 
+	 *
 	 * @param profile String representing the profile name
 	 * @param fileName String holding the name of file we are converting
 	 * @throws IOException
@@ -153,7 +153,7 @@ public class DocXConverter extends ComplexConverter {
 		return new File(ConverterConfiguration.STYLESHEETS_PATH).toString() + File.separator
 						+ "profiles" + File.separator
 						+ profile + File.separator
-						+ Format.DOCX.getId() + File.separator 
+						+ Format.DOCX.getId() + File.separator
 						+ "template.docx";
 	}
 
@@ -185,7 +185,7 @@ public class DocXConverter extends ComplexConverter {
 		String stylesheet = new File(ConverterConfiguration.STYLESHEETS_PATH).toString() + File.separator
 						+ "profiles" + File.separator
 						+ profile + File.separator
-						+ Format.DOCX.getId() + File.separator 
+						+ Format.DOCX.getId() + File.separator
 						+ "from.xsl";
 		return new StreamSource(new File(stylesheet));
 	}
@@ -197,7 +197,7 @@ public class DocXConverter extends ComplexConverter {
 		String stylesheet = new File(ConverterConfiguration.STYLESHEETS_PATH).toString() + File.separator
 						+ "profiles" + File.separator
 						+ profile + File.separator
-						+ Format.DOCX.getId() + File.separator 
+						+ Format.DOCX.getId() + File.separator
 						+ "to.xsl";
 		return new StreamSource(new File(stylesheet));
 
@@ -236,7 +236,7 @@ public class DocXConverter extends ComplexConverter {
 	public void mergeTEI(XdmNode teiDoc) throws SaxonApiException,
 			FileNotFoundException, IOException {
 		super.mergeTEI(teiDoc);
-		
+
 		// remove original core.xml file
 		File orgCoreFile = new File(tempDirectoryName + File.separator + "docProps"
 				+ File.separator + "core.xml");

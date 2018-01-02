@@ -41,10 +41,10 @@ import org.apache.log4j.Logger;
  * <p>
  * Abstract Class offering tools for complex conversions involving archive-like formats, e.g. odt and docx
  * </p>
- * Gives possibility to easily implement new transofrations, which are similar to odt and docx 
- * 
+ * Gives possibility to easily implement new transofrations, which are similar to odt and docx
+ *
  * @author Lukas Platinsky based on code by mariuszs
- * 
+ *
  */
 
 public abstract class ComplexConverter {
@@ -72,7 +72,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Constructs converter for conversion from TEI
-	 * 
+	 *
 	 * @param profile String representing the profile name
 	 * @throws IOException
 	 * @throws ConfigurationException
@@ -86,7 +86,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Constructs converter for conversion to TEI
-	 * 
+	 *
 	 * @param profile String representing the profile name
 	 * @param fileName String holding the name of file we are converting
 	 * @throws IOException
@@ -145,7 +145,7 @@ public abstract class ComplexConverter {
 	 * Returns path to the directory containing images
 	 */
 	protected abstract String getImagesDirectoryName();
-	
+
 	/**
 	 * Returns path to the directory containing images relative to the main document file
 	 */
@@ -173,7 +173,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Unzips the document file
-	 * 
+	 *
 	 * @param in
 	 * @throws IOException
 	 * @throws FileNotFoundException
@@ -188,7 +188,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Constructs XML TEI document from the original
-	 * 
+	 *
 	 * @param is
 	 * @param os
 	 * @return
@@ -214,7 +214,7 @@ public abstract class ComplexConverter {
 				if (dir.exists() && dir.isDirectory()) {
 					// try to create necessary directories
 					if (dirName.indexOf('/') != -1 && !dirName.substring(0, dirName.lastIndexOf('/')).equals("")) {
-						File dirToCreate = new File(tmpArchiveDirName + File.separator + 
+						File dirToCreate = new File(tmpArchiveDirName + File.separator +
 										dirName.substring(0, dirName.lastIndexOf('/')));
 						if (!dirToCreate.isDirectory())
 							dirToCreate.mkdirs();
@@ -261,7 +261,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Creates a document from TEI document
-	 * 
+	 *
 	 * @param teiDoc
 	 */
 	public void mergeTEI(XdmNode tei) throws SaxonApiException,
@@ -274,7 +274,7 @@ public abstract class ComplexConverter {
 		setParametersFromTEI(transformer);
 		// transform and write back to document
 		File contentsFile = new File(tempDirectoryName + File.separator + getContentsFileNameFromTEI());
-		Serializer result = new Serializer();
+		Serializer result = proc.newSerializer();
 		Writer writer = new BufferedWriter(new OutputStreamWriter(
 				new FileOutputStream(contentsFile), "UTF-8"));
 	    try {
@@ -290,7 +290,7 @@ public abstract class ComplexConverter {
 
 	/**
 	 * Packs selected directory into streamed zip archive.
-	 * 
+	 *
 	 * @param os
 	 * @param dir
 	 * @throws IOException
