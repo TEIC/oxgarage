@@ -27,6 +27,7 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.QName;
 
@@ -193,18 +194,15 @@ public class MultiXslConverter implements ConfigurableConverter {
 			proc.getUnderlyingConfiguration().setOutputURIResolver(
 					new MultiXslOutputResolver(uid));
 			XsltExecutable exec = comp.compile(new StreamSource(is));
-			XsltTransformer transformer = exec.load();
-			transformer.setInitialContextNode(proc.newDocumentBuilder().build(
-					new StreamSource(inputStream)));
-			Serializer result = new Serializer();
+			Xslt30Transformer transformer = exec.load30();
+			Serializer result = proc.newSerializer();
 
 			// create dummy result file - result file is empty
 			File dummyResult = new File(tempDir.getPath() + ".xml");
 			FileOutputStream dummyOs = new FileOutputStream(dummyResult);
 
 			result.setOutputStream(dummyOs);
-			transformer.setDestination(result);
-			transformer.transform();
+                        transformer.applyTemplates(new StreamSource(inputStream), result);
 			dummyOs.close();
 			dummyResult.delete();
 
@@ -309,7 +307,7 @@ public class MultiXslConverter implements ConfigurableConverter {
 				transformer.setParameter(new QName("input-uri"), new XdmAtomicValue(inputFile.toString()));
 			}
 			transformer.setParameter(new QName("configDirectory"), new XdmAtomicValue(EGEConstants.TEIROOT));
-			Serializer result = new Serializer();
+			Serializer result = proc.newSerializer();
 			result.setOutputStream(fos);
 			transformer.setDestination(result);
 			transformer.transform();
