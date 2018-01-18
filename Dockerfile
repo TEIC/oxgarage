@@ -24,7 +24,8 @@ RUN unzip /tmp/saxon.zip -d ${OXGARAGE_BUILD_HOME}/saxon \
     && mvn install:install-file -DgroupId=com.sun.star -DartifactId=unoil -Dversion=3.2.1 -Dpackaging=jar -Dfile=jod-lib/unoil-3.2.1.jar \
     && mvn install:install-file -DgroupId=com.sun.star -DartifactId=ridl  -Dversion=3.2.1 -Dpackaging=jar -Dfile=jod-lib/ridl-3.2.1.jar \
     && mvn install:install-file -DgroupId=org.apache.commons.cli -DartifactId=commons-cli -Dversion=1.1 -Dpackaging=jar -Dfile=jod-lib/commons-cli-1.1.jar \
-    && mvn install:install-file -DgroupId=net.sf.saxon -DartifactId=commons-cli -Dversion=9.8 -Dpackaging=jar -Dfile=${OXGARAGE_BUILD_HOME}/saxon/saxon9he.jar
+    && mvn install:install-file -DgroupId=net.sf.saxon -DartifactId=commons-cli -Dversion=9.8 -Dpackaging=jar -Dfile=${OXGARAGE_BUILD_HOME}/saxon/saxon9he.jar \
+    && mvn install
 
 
 #########################################
@@ -44,11 +45,14 @@ RUN apk --update add libreoffice \
     font-noto \
     && ln -s ${OFFICE_HOME} /usr/lib/openoffice 
 
-COPY --from=builder /opt/oxgarage-build/ege-webservice/target/ege-webservice/WEB-INF/lib/oxgarage.properties /etc/
-COPY --from=builder /opt/oxgarage-build/log4j.xml /var/cache/oxgarage/log4j.xml
+# copy some settings and entrypoint script
+COPY ege-webservice/src/main/webapp/WEB-INF/lib/oxgarage.properties /etc/
+COPY log4j.xml /var/cache/oxgarage/log4j.xml
+COPY docker-entrypoint.sh /my-docker-entrypoint.sh
+
+# copy build artifacts 
 COPY --from=builder /opt/oxgarage-build/ege-webclient/target/ege-webclient.war /tmp/ege-webclient.war
 COPY --from=builder /opt/oxgarage-build/ege-webservice/target/ege-webservice.war /tmp/ege-webservice.war
-COPY --from=builder /opt/oxgarage-build/docker-entrypoint.sh /my-docker-entrypoint.sh
        
 RUN mkdir ${JETTY_WEBAPPS}/ege-webclient \
     && mkdir ${JETTY_WEBAPPS}/ege-webservice \
