@@ -9,12 +9,38 @@ developed by Poznan Supercomputing and Networking Center and Oxford University C
 Installing
 --------
 
-Packages are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/
+### with Docker
+
+If you have Docker installed, you can fetch a readymade image from [Docker Hub](https://hub.docker.com/r/teic/oxgarage/).
+```
+docker run --rm \
+    -p 8080:8080 \
+    -v /your/path/to/Stylesheets:/usr/share/xml/tei/stylesheet \ 
+    -v /your/path/to/TEI/P5:/usr/share/xml/tei/odd \
+    -e WEBSERVICE_URL=http://localhost:8080/ege-webservice/  \
+    --name oxgarage teic/oxgarage
+```
+Once it's running, you can point your browser at `http://localhost:8080/ege-webclient/` for the user interface.
+
+#### available parameters
+
+* **WEBSERVICE_URL** : The full URL of the RESTful *web service*. This is relevant for the *web client* (aka the GUI) if you are running the docker container on a different port or with a different URL.
+
+NB: For running the image you'll need to have the TEI Stylesheets as well as the TEI P5 sources.
+There are several ways to obtain these (see "Get and install a local copy" at http://www.tei-c.org/Guidelines/P5/),  
+one of them is to download the latest release of both 
+[TEI](https://github.com/TEIC/TEI/releases) and [Stylesheets](https://github.com/TEIC/Stylesheets/releases) from GitHub. 
+Then, the Stylesheets' root directory must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
+P5 sources you'll need to find the subdirectory which holds the file `p5subset.xml` and map this to `/usr/share/xml/tei/odd`; (should be `xml/tei/odd`).
+
+###  without Docker
+
+Application packages (war files) are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/
 
  * If you have a running Tomcat (or similar container), you can download  two WAR files from the CI server and install them in the normal way. in this case, you will need to do some configuration manually
 
  1.   copy the file  `ege-webservice/WEB-INF/lib/oxgarage.properties` to `/etc/oxgarage.properties`
- 2.   create a directorory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
+ 2.   create a directory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
  3.   make the directory owned by the Tomcat user, so that it can create files there: eg `chown -R tomcat6:tomcat6 /var/cache/oxgarage`
  4.   edit the file `webapps/ege-webclient/WEB-INF/web.xml` so that it has the hostname of the server set. eg
     perl -p -i -e "s/localhost/`hostname -f`/" /var/lib/tomcat6/webapps/ege-webclient/WEB-INF/web.xml
