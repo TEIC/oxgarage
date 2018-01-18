@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setting the webservice URL for the client
-sed -i -e "s@http:\/\/localhost:8080\/ege-webservice\/@$WEBSERVICE_URL@" $JETTY_WEBAPPS/ege-webclient/WEB-INF/web.xml  
+sed -i -e "s@http:\/\/localhost:8080\/ege-webservice\/@$WEBSERVICE_URL@" ${CATALINA_WEBAPPS}/ege-webclient/WEB-INF/web.xml  
 
-# Run the default jetty entrypoint script 
-exec /docker-entrypoint.sh
+# run the command given in the Dockerfile at CMD 
+exec "$@"

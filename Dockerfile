@@ -27,22 +27,27 @@ RUN unzip /tmp/saxon.zip -d ${OXGARAGE_BUILD_HOME}/saxon \
     && mvn install:install-file -DgroupId=net.sf.saxon -DartifactId=commons-cli -Dversion=9.8 -Dpackaging=jar -Dfile=${OXGARAGE_BUILD_HOME}/saxon/saxon9he.jar \
     && mvn install
 
-
 #########################################
 # Now installing the Jetty server
 # and adding our freshly built war packages
 #########################################
-FROM jetty:alpine
+FROM tomcat:7
 
-ENV JETTY_WEBAPPS ${JETTY_BASE}/webapps
+ENV CATALINA_WEBAPPS ${CATALINA_HOME}/webapps
 ENV OFFICE_HOME /usr/lib/libreoffice
 
 USER root:root
 
-RUN apk --update add libreoffice \
+RUN apt-get update \
+    && apt-get install -y --force-yes libreoffice \
     ttf-dejavu \
-    ttf-linux-libertine \ 
-    font-noto \
+    fonts-arphic-ukai \
+    fonts-arphic-uming \
+    ttf-baekmuk \
+    ttf-junicode \
+    fonts-linuxlibertine \
+    fonts-ipafont-gothic \
+    fonts-ipafont-mincho \
     && ln -s ${OFFICE_HOME} /usr/lib/openoffice 
 
 # copy some settings and entrypoint script
@@ -54,29 +59,24 @@ COPY docker-entrypoint.sh /my-docker-entrypoint.sh
 COPY --from=builder /opt/oxgarage-build/ege-webclient/target/ege-webclient.war /tmp/ege-webclient.war
 COPY --from=builder /opt/oxgarage-build/ege-webservice/target/ege-webservice.war /tmp/ege-webservice.war
        
-RUN mkdir ${JETTY_WEBAPPS}/ege-webclient \
-    && mkdir ${JETTY_WEBAPPS}/ege-webservice \
-    && unzip -q /tmp/ege-webclient.war -d ${JETTY_WEBAPPS}/ege-webclient/ \
-    && unzip -q /tmp/ege-webservice.war -d ${JETTY_WEBAPPS}/ege-webservice/ \
+RUN mkdir ${CATALINA_WEBAPPS}/ege-webclient \
+    && mkdir ${CATALINA_WEBAPPS}/ege-webservice \
+    && unzip -q /tmp/ege-webclient.war -d ${CATALINA_WEBAPPS}/ege-webclient/ \
+    && unzip -q /tmp/ege-webservice.war -d ${CATALINA_WEBAPPS}/ege-webservice/ \
     && rm /tmp/ege-webclient.war \
-    && rm /tmp/ege-webservice.war
-
-# add some Jetty jars needed for CORS support
-ADD http://central.maven.org/maven2/org/eclipse/jetty/jetty-servlets/9.4.7.v20170914/jetty-servlets-9.4.7.v20170914.jar "$JETTY_WEBAPPS"/ege-webservice/WEB-INF/lib/
-ADD http://central.maven.org/maven2/org/eclipse/jetty/jetty-util/9.4.7.v20170914/jetty-util-9.4.7.v20170914.jar "$JETTY_WEBAPPS"/ege-webservice/WEB-INF/lib/
-
-# set rights for the jetty user who will run the services
-RUN chown -R jetty:jetty \
-    /var/cache/oxgarage \
-    ${JETTY_WEBAPPS}/* \
-    /my-docker-entrypoint.sh \
+    && rm /tmp/ege-webservice.war \
     && chmod 755 /my-docker-entrypoint.sh
 
-USER jetty:jetty
+# set rights for the jetty user who will run the services
+#RUN chown -R jetty:jetty \
+#    /var/cache/oxgarage \
+#    ${CATALINA_WEBAPPS}/* \
+#    /my-docker-entrypoint.sh \
+#    && chmod 755 /my-docker-entrypoint.sh
 
 VOLUME ["/usr/share/xml/tei/stylesheet", "/usr/share/xml/tei/odd"]
 
 EXPOSE 8080
 
 ENTRYPOINT ["/my-docker-entrypoint.sh"]
-CMD ["java","-jar","/usr/local/jetty/start.jar"]
+CMD ["catalina.sh", "run"]
