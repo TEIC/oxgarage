@@ -16,9 +16,9 @@ test:
 	curl -s  -F upload=@test.odd  -o temp-results/test.js http://$(SERVER):$(PORT)/ege-webservice/Conversions/ODD%3Atext%3Axml/ODDC%3Atext%3Axml/oddjson%3Aapplication%3Ajson/
 	perl -p -i -e 's/"date":"20.*Z"/"date":""/' temp-results/test.js
 	diff temp-results/test.js expected-results/test.js
-	echo TCP to TEI P5
-	curl -s -o temp-results/A00005.xml -F upload=@A00005.xml -F upload=@A00005.hdr http://$(SERVER):$(PORT)/ege-webservice/Conversions/TCP%3Atext%3Axml/TEI%3Atext%3Axml/
-	diff temp-results/A00005.xml expected-results/A00005.xml
+	#echo TCP to TEI P5
+	#curl -s -o temp-results/A00005.xml -F upload=@A00005.xml -F upload=@A00005.hdr http://$(SERVER):$(PORT)/ege-webservice/Conversions/TCP%3Atext%3Axml/TEI%3Atext%3Axml/
+	#diff temp-results/A00005.xml expected-results/A00005.xml
 	echo ODD to DTD
 	curl -s  -F upload=@test.odd  -o temp-results/result4.dtd http://$(SERVER):$(PORT)/ege-webservice/Conversions/ODD%3Atext%3Axml/ODDC%3Atext%3Axml/dtd%3Aapplication%3Axml-dtd/
 	perl -p -i -e 's/DTD generated.*/DTD/' temp-results/result4.dtd
