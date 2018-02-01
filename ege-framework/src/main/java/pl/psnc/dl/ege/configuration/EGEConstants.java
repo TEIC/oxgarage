@@ -16,28 +16,34 @@ import org.apache.log4j.Logger;
 
 public final class  EGEConstants {
         public static final Properties oxgProps = new Properties();
-        String whereami = EGEConstants.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String PATH = whereami.substring(0, whereami.lastIndexOf(File.separator));
+        static String whereami = EGEConstants.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        static String PATH = whereami.substring(0, whereami.lastIndexOf(File.separator));
 	private final static Logger LOGGER = Logger.getLogger(EGEConfigurationManager.class.getName());
 	    
         static {
-	    try {
-		oxgProps.load(new FileInputStream("/etc/oxgarage.properties"));
-	    }
-	    catch (java.io.IOException e) {
-			LOGGER.error("Could not read file /etc/oxgarage.properties");
-		}
+            try {
+                System.out.println(PATH);
+		oxgProps.load(new FileInputStream(PATH + File.separator + "oxgarage.properties"));
+	    } catch (java.io.IOException e) {
+                try {
+                    oxgProps.load(new FileInputStream(PATH + File.separator + "oxgarage.properties"));
+                } catch (java.io.IOException ex) {
+                    LOGGER.error("Could not read file /etc/oxgarage.properties or " + PATH 
+                            + File.separator + "oxgarage.properties" );
+                }
+            }
+	    
 	}
 
 	
         /**
 	 * EGE temporary files directory
 	 */
-    public static final String OXGAPP = oxgProps.getProperty("OXGARAGE","/var/cache/oxgarage/");
-    public static final String TEIROOT = oxgProps.getProperty("TEI","/usr/share/xml/tei/");
-    public static final String OpenOfficeConfig = oxgProps.getProperty("OpenOfficeConfig","/usr/lib/libreoffice/");
-    public static final String DEFAULT_LOCALE = oxgProps.getProperty("defaultLocale","en"); 
-    public static final String DEFAULT_PROFILE = oxgProps.getProperty("defaultProfile","default"); 	
+        public static final String OXGAPP = oxgProps.getProperty("OXGARAGE","/var/cache/oxgarage/");
+        public static final String TEIROOT = oxgProps.getProperty("TEI","/usr/share/xml/tei/");
+        public static final String OpenOfficeConfig = oxgProps.getProperty("OpenOfficeConfig","/usr/lib/libreoffice/");
+        public static final String DEFAULT_LOCALE = oxgProps.getProperty("defaultLocale","en"); 
+        public static final String DEFAULT_PROFILE = oxgProps.getProperty("defaultProfile","default"); 	
 	// name for document family consisting of text documents
 	public static final String TEXTFAMILY = "Documents";
 	public static final String TEXTFAMILYCODE = "text";

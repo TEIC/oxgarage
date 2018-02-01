@@ -292,7 +292,7 @@ public class DocX {
 			
 			// transform and write back to newdocument.xml
 			File wordDotXMLFile = new File(directoryName + File.separator + "word" + File.separator + "document.xml");
-			Serializer result = new Serializer();
+			Serializer result = proc.newSerializer();
 			result.setOutputFile(wordDotXMLFile);
 			toDocX.setInitialContextNode(teiDoc);
 			toDocX.setDestination(result);
@@ -353,7 +353,7 @@ public class DocX {
 			XdmNode wordDotXML = XMLUtils.readFileIntoSaxonDoc( oldDocumentFile );
 			
 					
-			Serializer result = new Serializer();
+			Serializer result = proc.newSerializer();
 			result.setOutputFile(newDocumentFile);
 			toDocX.setInitialContextNode(wordDotXML);
 			toDocX.setDestination(result);

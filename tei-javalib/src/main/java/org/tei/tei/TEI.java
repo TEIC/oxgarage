@@ -215,7 +215,7 @@ public class TEI {
 		if(null != properties.getMessageListener())
 			odd2dtdTransformer.setMessageListener(properties.getMessageListener());
 		odd2dtdTransformer.setInitialContextNode(tei);
-		Serializer result = new Serializer();
+		Serializer result = proc.newSerializer();
 		result.setOutputFile(properties.getOutputFile());
 		odd2dtdTransformer.setDestination(result);
 		odd2dtdTransformer.transform();
@@ -282,7 +282,7 @@ public class TEI {
 		if(null != properties.getMessageListener())
 			transformer.setMessageListener(properties.getMessageListener());
 		transformer.setInitialContextNode(tei);
-		Serializer result = new Serializer();
+		Serializer result = proc.newSerializer();
 		result.setOutputFile( properties.getOutputFile() );
 		transformer.setDestination(result);
 		transformer.transform();

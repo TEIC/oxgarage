@@ -4,19 +4,45 @@ OxGarage
 OxGarage is a web, and RESTful, service to manage the transformation of documents between a variety of formats. The majority of transformations use Text Encoding Initiative XML as a pivot format, and Libre/Open Office to read some binary document formats
 
 OxGarage is based on the Enrich Garage Engine (https://sourceforge.net/projects/enrich-ege/)
-developed by Poznan Supercomputing and Networking Center and Oxford University Computing Services for the EU-funded ENRICH project 
+developed by Poznan Supercomputing and Networking Center and Oxford University Computing Services for the EU-funded ENRICH project
 
 Installing
 --------
 
-Packages are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/
+### with Docker
+
+If you have Docker installed, you can fetch a readymade image from [Docker Hub](https://hub.docker.com/r/teic/oxgarage/).
+```
+docker run --rm \
+    -p 8080:8080 \
+    -v /your/path/to/Stylesheets:/usr/share/xml/tei/stylesheet \ 
+    -v /your/path/to/TEI/P5:/usr/share/xml/tei/odd \
+    -e WEBSERVICE_URL=http://localhost:8080/ege-webservice/  \
+    --name oxgarage teic/oxgarage
+```
+Once it's running, you can point your browser at `http://localhost:8080/ege-webclient/` for the user interface.
+
+#### available parameters
+
+* **WEBSERVICE_URL** : The full URL of the RESTful *web service*. This is relevant for the *web client* (aka the GUI) if you are running the docker container on a different port or with a different URL.
+
+NB: For running the image you'll need to have the TEI Stylesheets as well as the TEI P5 sources.
+There are several ways to obtain these (see "Get and install a local copy" at http://www.tei-c.org/Guidelines/P5/),  
+one of them is to download the latest release of both 
+[TEI](https://github.com/TEIC/TEI/releases) and [Stylesheets](https://github.com/TEIC/Stylesheets/releases) from GitHub. 
+Then, the Stylesheets' root directory must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
+P5 sources you'll need to find the subdirectory which holds the file `p5subset.xml` and map this to `/usr/share/xml/tei/odd`; (should be `xml/tei/odd`).
+
+###  without Docker
+
+Application packages (war files) are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/
 
  * If you have a running Tomcat (or similar container), you can download  two WAR files from the CI server and install them in the normal way. in this case, you will need to do some configuration manually
- 
+
  1.   copy the file  `ege-webservice/WEB-INF/lib/oxgarage.properties` to `/etc/oxgarage.properties`
- 2.   create a directorory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
+ 2.   create a directory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
  3.   make the directory owned by the Tomcat user, so that it can create files there: eg `chown -R tomcat6:tomcat6 /var/cache/oxgarage`
- 4.   edit the file `webapps/ege-webclient/WEB-INF/web.xml` so that it has the hostname of the server set. eg 
+ 4.   edit the file `webapps/ege-webclient/WEB-INF/web.xml` so that it has the hostname of the server set. eg
     perl -p -i -e "s/localhost/`hostname -f`/" /var/lib/tomcat6/webapps/ege-webclient/WEB-INF/web.xml
  5.  make sure the TEI stylesheets and source are installed at `/usr/share/xml/tei` using the Debian file hierarchy standard; the distribution file at https://sourceforge.net/projects/tei/files/Stylesheets/ is in the right layout.
 
@@ -49,8 +75,8 @@ There are a variety of packages which may not be available in Maven repositories
     mvn install:install-file -DgroupId=com.sun.star -DartifactId=unoil -Dversion=3.2.1 -Dpackaging=jar -Dfile=jod-lib/unoil-3.2.1.jar
     mvn install:install-file -DgroupId=com.sun.star -DartifactId=ridl  -Dversion=3.2.1 -Dpackaging=jar -Dfile=jod-lib/ridl-3.2.1.jar
     mvn install:install-file -DgroupId=org.apache.commons.cli -DartifactId=commons-cli -Dversion=1.1 -Dpackaging=jar -Dfile=jod-lib/commons-cli-1.1.jar
+    mvn install:install-file -DgroupId=net.sf.saxon -DartifactId=commons-cli -Dversion=9.8 -Dpackaging=jar -Dfile=jsaxon9he.jar
 
- 
 
 # How does the OxGarage work:
 
@@ -82,7 +108,7 @@ In order to do this, you need to add the document format into one of the files: 
 
 # How to redefine weights of edges for conversions
 
-As was mentioned before, each conversion is assigned a weight according to how much we trust the result. The better the result, the lower the weight. This has to be done, because there is a huge amount of possible ways how to get from input format to output format. Therefore, now the program chooses always the path with the smallest total weight, which is calculated as sum of weights of all conversions which form the path. If there is more than one path with the smallest total weight, one of the paths is chosen non-deterministically. 
+As was mentioned before, each conversion is assigned a weight according to how much we trust the result. The better the result, the lower the weight. This has to be done, because there is a huge amount of possible ways how to get from input format to output format. Therefore, now the program chooses always the path with the smallest total weight, which is calculated as sum of weights of all conversions which form the path. If there is more than one path with the smallest total weight, one of the paths is chosen non-deterministically.
 
 However, during time the conversions will surely become more refined and produce better results. Therefore, you might want to change the weights to make the service use the current best conversions more often. Again, what you need to do in order to change the weights depends quite a lot on the converter.
 
@@ -97,4 +123,3 @@ In this case you need to find Format.java file. There you can easily adjust the 
 ## Changing weights in OOConverter
 
 In OOConverter weights are calculated as the sum of the input's and output's weight. Therefore, if for example in the new version of OpenOffice.org its ability to read docx files improves rapidly and you would like to reflect this in the weightings, you need to find the appropriate input type in the appropriate file. In this case it would be DOCX in InputTextFormat.java. Now you simply change the value of the cost variable and it's done.
-

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -28,7 +29,7 @@ import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XdmAtomicValue;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
-import net.sf.saxon.s9api.XsltTransformer;
+import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XdmNode;
 
 import org.xml.sax.ErrorHandler;
@@ -74,17 +75,17 @@ import org.xml.sax.SAXParseException;
  * <p>
  * EGE Converter interface implementation
  * </p>
- * 
+ *
  * Provides multiple conversions for Enrich TEI format.<br>
  * <b>Important : </b> the converter expects only compressed data. Data is
  * compressed with standard EGE IOResolver received from
  * EGEConfigurationManager.
- * 
+ *
  * @author mariuszs
- * 
+ *
  */
 public class TEIConverter implements Converter,ErrorHandler {
-	
+
 	private static final String EX_NO_FILE_DATA_WAS_FOUND = "No file data was found for conversion";
 
 	// List of directories which might contain images for input type
@@ -115,7 +116,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 
 	public void warning(TransformerException exception)
 			throws TransformerException {
-		LOGGER.info("Warning: " + exception.getMessage());	
+		LOGGER.info("Warning: " + exception.getMessage());
 	}
 
 
@@ -335,7 +336,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 					.getProfile(), profile,"to", properties);
 		}
 		// TEI to LITE
-		else if (Format.LITE.getMimeType().equals(toMimeType) 
+		else if (Format.LITE.getMimeType().equals(toMimeType)
 			 && fromDataType.getFormat().equals(Format.LITE.getFormatName())) {
 			if (!ConverterConfiguration.checkProfile(profile, Format.LITE
 					.getProfile())) {
@@ -425,7 +426,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 			performXsltTransformation(inputStream, outputStream, Format.RDF
 					.getProfile(), profile,"to", properties);
 		}
-       
+
 	}
 
 	/*
@@ -461,9 +462,9 @@ public class TEIConverter implements Converter,ErrorHandler {
 		FileInputStream fis = new FileInputStream(inputFile);
 		return fis;
 	}
-	
+
 	/*
-	 * Search for specified by regex file 
+	 * Search for specified by regex file
 	 */
 	private File searchForData(File dir, String regex) {
 		for (File f : dir.listFiles()) {
@@ -480,7 +481,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 		}
 		return null;
 	}
-	
+
 	private File prepareTempDir() {
 		File inTempDir = null;
 		String uid = UUID.randomUUID().toString();
@@ -498,9 +499,9 @@ public class TEIConverter implements Converter,ErrorHandler {
 		ZipFile zipFile = null;
 		File zipOutputDir = null;
 		while (sFile!=null) {
-			try { 
+			try {
 				zipFile = new ZipFile(sFile);
-				
+
 				zipOutputDir = new File(imageDir + File.separator + sFile.getName().replace('.', '-') + File.separator);
 				zipOutputDir.mkdir();
 				EGEIOUtils.unzipFile(zipFile, zipOutputDir);
@@ -514,7 +515,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 	}
 
 	/*
-	 * Performs transformation with XSLT 
+	 * Performs transformation with XSLT
 	 */
 	private void performXsltTransformation(InputStream inputStream,
 					       OutputStream outputStream, String id, String profile, String direction, Map<String, String> properties)
@@ -535,26 +536,31 @@ public class TEIConverter implements Converter,ErrorHandler {
 			Processor proc = SaxonProcFactory.getProcessor();
 			XsltCompiler comp = proc.newXsltCompiler();
 			// get images and correct graphics tags
-			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "media" + File.separator, 
+			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "media" + File.separator,
 							"media" + File.separator, inputFile, proc, is, "Xslt", properties);
 			String extension = properties.get("extension");
 			File resFile = new File(outTempDir + File.separator + "document." + extension);
 			fos = new FileOutputStream(resFile);
 			XsltExecutable exec = comp.compile(resolveConfiguration(id, comp, profile, direction));
-			XsltTransformer transformer = exec.load();
-			if(properties.get(ConverterConfiguration.LANGUAGE_KEY)!=null) 
+			Xslt30Transformer transformer = exec.load30();
+			if(properties.get(ConverterConfiguration.LANGUAGE_KEY)!=null)
 			    {
 				XdmAtomicValue doclang = new XdmAtomicValue(properties.get(ConverterConfiguration.LANGUAGE_KEY));
-				transformer.setParameter(new QName("lang"), doclang);
-				transformer.setParameter(new QName("doclang"), doclang);
-				transformer.setParameter(new QName("documentationLanguage"), doclang);
+				Map langPara = new HashMap();
+				langPara.put(new QName("lang"), doclang);
+				Map doclangPara = new HashMap();
+				doclangPara.put(new QName("doclang"), doclang);
+				Map documentationLanguagePara = new HashMap();
+				documentationLanguagePara.put(new QName("documentationLanguage"), doclang);
+				transformer.setStylesheetParameters(langPara);
+				transformer.setStylesheetParameters(doclangPara);
+				transformer.setStylesheetParameters(documentationLanguagePara);
 			    }
 			setTransformationParameters(transformer, id);
 			transformer.setInitialContextNode(initialNode);
-			Serializer result = new Serializer();
+			Serializer result = proc.newSerializer();
 			result.setOutputStream(fos);
-			transformer.setDestination(result);
-			transformer.transform();
+			transformer.applyTemplates(initialNode, result);
 			ior.compressData(outTempDir, outputStream);
 			}
 		} finally {
@@ -596,7 +602,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 			Processor proc = SaxonProcFactory.getProcessor();
 			XsltCompiler comp = proc.newXsltCompiler();
 			// get images and correct graphics tags
-			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "media" + File.separator, 
+			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "media" + File.separator,
 							"media" + File.separator, inputFile, proc, is, "Xslt", properties);
 			String extension = properties.get("extension");
 			String realextension = properties.get("extension");
@@ -607,20 +613,25 @@ public class TEIConverter implements Converter,ErrorHandler {
 			File outFile = new File(outTempDir + File.separator + "document." + realextension);
 			fos = new FileOutputStream(inFile);
 			XsltExecutable exec = comp.compile(resolveConfiguration(id, comp, profile, "to"));
-			XsltTransformer transformer = exec.load();
-			if(properties.get(ConverterConfiguration.LANGUAGE_KEY)!=null) 
+			Xslt30Transformer transformer = exec.load30();
+			if(properties.get(ConverterConfiguration.LANGUAGE_KEY)!=null)
 			    {
 				XdmAtomicValue doclang = new XdmAtomicValue(properties.get(ConverterConfiguration.LANGUAGE_KEY));
-				transformer.setParameter(new QName("lang"), doclang);
-				transformer.setParameter(new QName("doclang"), doclang);
-				transformer.setParameter(new QName("documentationLanguage"), doclang);
+				Map langPara = new HashMap();
+				langPara.put(new QName("lang"), doclang);
+				Map doclangPara = new HashMap();
+				doclangPara.put(new QName("doclang"), doclang);
+				Map documentationLanguagePara = new HashMap();
+				documentationLanguagePara.put(new QName("documentationLanguage"), doclang);
+				transformer.setStylesheetParameters(langPara);
+				transformer.setStylesheetParameters(doclangPara);
+				transformer.setStylesheetParameters(documentationLanguagePara);
 			    }
 			setTransformationParameters(transformer, id);
 			transformer.setInitialContextNode(initialNode);
-			Serializer result = new Serializer();
+			Serializer result = proc.newSerializer();
 			result.setOutputStream(fos);
-			transformer.setDestination(result);
-			transformer.transform();
+			transformer.applyTemplates(initialNode, result);
 			InputFormat inFormat = new SAXParseInputFormat();
 			OutputFormat of;
 			Resolver resolver =null;
@@ -632,7 +643,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 			    outputParamArray = new String[]{"disable-abstract-elements"};
 			}
 			SchemaCollection sc =  inFormat.load(UriOrFile.toUri(inFile.getAbsolutePath()), inputParamArray, realextension, this,resolver);
-			OutputDirectory od = new LocalOutputDirectory( 
+			OutputDirectory od = new LocalOutputDirectory(
 								      sc.getMainUri(),
 								      outFile,
 								      "." + realextension,
@@ -641,15 +652,15 @@ public class TEIConverter implements Converter,ErrorHandler {
 								      2
 								       );
 			of.output(sc, od, outputParamArray, "rng", this);
-			try{			    			    
+			try{
 			    if(! inFile.delete()){
 				LOGGER.info("Delete operation failed on " + inFile);
 			    }
-			    
+
 			}catch(Exception e){
-			    
+
 			    e.printStackTrace();
-			    
+
 			}
 			ior.compressData(outTempDir, outputStream);
 		} finally {
@@ -674,24 +685,48 @@ public class TEIConverter implements Converter,ErrorHandler {
 	/*
 	 * Additional parameters for XHTML transformation.
 	 */
-	private void setTransformationParameters(XsltTransformer transformer,
+	private void setTransformationParameters(Xslt30Transformer transformer,
 			String id) {
 		if (Format.XHTML.getId().equals(id)) {
-			transformer.setParameter(new QName("STDOUT"), new XdmAtomicValue(
+			Map stdoutPara = new HashMap();
+			stdoutPara.put(new QName("STDOUT"), new XdmAtomicValue(
 					"true"));
-			transformer.setParameter(new QName("splitLevel"),
-					new XdmAtomicValue("-1"));
-			transformer.setParameter(new QName("lang"),
-					new XdmAtomicValue("en"));
-			transformer.setParameter(new QName("doclang"), new XdmAtomicValue(
+			try{
+				transformer.setStylesheetParameters(stdoutPara);
+			}catch(Exception ex){ /* do nothing */ }
+			Map splitLevelPara = new HashMap();
+			splitLevelPara.put(new QName("splitLevel"), new XdmAtomicValue(
+					"-1"));
+			try{
+				transformer.setStylesheetParameters(splitLevelPara);
+			}catch(Exception ex){ /* do nothing */ }
+			Map langPara = new HashMap();
+			langPara.put(new QName("lang"), new XdmAtomicValue(
 					"en"));
-			transformer.setParameter(new QName("documentationLanguage"),
-					new XdmAtomicValue("en"));
-			transformer.setParameter(new QName("institution"),
-					new XdmAtomicValue(""));
+			try{
+				transformer.setStylesheetParameters(langPara);
+			}catch(Exception ex){ /* do nothing */ }
+			Map doclangPara = new HashMap();
+			doclangPara.put(new QName("doclang"), new XdmAtomicValue(
+					"en"));
+			try{
+				transformer.setStylesheetParameters(doclangPara);
+			}catch(Exception ex){ /* do nothing */ }
+			Map docomentationLanguagePara = new HashMap();
+			docomentationLanguagePara.put(new QName("docomentationLanguage"), new XdmAtomicValue(
+					"en"));
+			try{
+				transformer.setStylesheetParameters(docomentationLanguagePara);
+			}catch(Exception ex){ /* do nothing */ }
+			Map institutionPara = new HashMap();
+			institutionPara.put(new QName("institution"), new XdmAtomicValue(
+					""));
+			try{
+				transformer.setStylesheetParameters(institutionPara);
+			}catch(Exception ex){ /* do nothing */ }
 		}
 	}
-	
+
 
 	/*
 	 * Performs from XlsX to TEI transformation
@@ -769,7 +804,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 			}
 		}
 	}
-	
+
 	/*
 	 * Performs From TEI to DocX transformation
 	 */
@@ -787,7 +822,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 		try {
 			docX = new DocXConverter(profile);
 			// get images and correct graphics tags
-			XdmNode initialNode = getImages(inTmpDir.toString(), docX.getDirectoryName(), docX.getImagesDirectoryName(), 
+			XdmNode initialNode = getImages(inTmpDir.toString(), docX.getDirectoryName(), docX.getImagesDirectoryName(),
 						docX.getImagesDirectoryNameRelativeToDocument(), inputFile, proc, inputStream, "toDocx", properties);
 			// perform conversion
 			// remove files
@@ -872,7 +907,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 		try {
 			odt = new OdtConverter(profile);
 			// get images and correct graphics tags
-			XdmNode initialNode = getImages(inTmpDir.toString(), odt.getDirectoryName(), odt.getImagesDirectoryName(), 
+			XdmNode initialNode = getImages(inTmpDir.toString(), odt.getDirectoryName(), odt.getImagesDirectoryName(),
 						odt.getImagesDirectoryNameRelativeToDocument(), inputFile, proc, inputStream, "toOdt", properties);
 			// perform conversion
 			odt.mergeTEI(initialNode);
@@ -923,24 +958,29 @@ public class TEIConverter implements Converter,ErrorHandler {
 			Processor proc = SaxonProcFactory.getProcessor();
 			XsltCompiler comp = proc.newXsltCompiler();
 			// get images and correct graphics tags
-			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "OPS" + File.separator + "media" + 
+			XdmNode initialNode = getImages(inTmpDir.toString(), outTempDir.toString(), "OPS" + File.separator + "media" +
 							File.separator, "media" + File.separator, inputFile, proc, is, "toEpub", properties);
 			XsltExecutable exec = comp.compile(resolveConfiguration(id, comp, profile,"to"));
-			XsltTransformer transformer = exec.load();
+			Xslt30Transformer transformer = exec.load30();
 			String dirname = outTempDir.toURI().toString();
-			transformer.setParameter(new QName("directory"), new XdmAtomicValue(dirname));
-			transformer.setParameter(new QName("outputDir"), new XdmAtomicValue(dirname + File.separator + "OPS" + File.separator));
+			Map directoryPara = new HashMap();
+			directoryPara.put(new QName("directory"), new XdmAtomicValue(dirname));
+			transformer.setStylesheetParameters(directoryPara);
+			Map outputDirPara = new HashMap();
+			outputDirPara.put(new QName("outputDir"), new XdmAtomicValue(dirname + File.separator + "OPS" + File.separator));
+			transformer.setStylesheetParameters(outputDirPara);
 			File coverTemplate = new File (ConverterConfiguration.STYLESHEETS_PATH + File.separator + "profiles" + File.separator + profile + File.separator + "epub" + File.separator + "cover.jpg");
-			if (coverTemplate.exists()) { 
+			if (coverTemplate.exists()) {
 			    String coverOutputDir = outTempDir + File.separator + "OPS" + File.separator;
 			    String coverImage = ImageFetcher.generateCover(coverTemplate, coverOutputDir, properties);
-			    transformer.setParameter(new QName("coverimage"), new XdmAtomicValue(coverImage));
+					Map coverimagePara = new HashMap();
+					coverimagePara.put(new QName("coverimage"), new XdmAtomicValue(coverImage));
+					transformer.setStylesheetParameters(coverimagePara);
 			}
 			setTransformationParameters(transformer, id);
 			transformer.setInitialContextNode(initialNode);
-			Serializer result = new Serializer();
-			transformer.setDestination(result);
-			transformer.transform();
+			Serializer result = proc.newSerializer();
+			transformer.applyTemplates(initialNode, result);
 			outputDir = prepareTempDir();
 			File oEpubFile = new File(outputDir.getAbsolutePath() + File.separator + "result.epub");
 			fos = new FileOutputStream(oEpubFile);
@@ -952,7 +992,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 			    File mimetype = new File(outTempDir + File.separator + "mimetype");
 			    EGEIOUtils.constructZip(outTempDir, zipOs, "", mimetype);
 			}
-			finally 
+			finally
 			    {
 				zipOs.close();
 			    }
@@ -982,35 +1022,35 @@ public class TEIConverter implements Converter,ErrorHandler {
 		}
 	}
 
-	private XdmNode getImages(String inputTempDir, String outputTemp, String outputImgDir, String imgDirRelativeToDoc, 
+	private XdmNode getImages(String inputTempDir, String outputTemp, String outputImgDir, String imgDirRelativeToDoc,
 					File inputFile, Processor proc, InputStream is, String conversion, Map<String,String> properties)
 			throws IOException, SaxonApiException, ConverterException {
 		File inputImages = null;
 		boolean getImages = true;
 		boolean downloadImages = true;
 		boolean textOnly = false;
-		if(properties.get(ConverterConfiguration.IMAGES_KEY)!=null) 
+		if(properties.get(ConverterConfiguration.IMAGES_KEY)!=null)
 			getImages = properties.get(ConverterConfiguration.IMAGES_KEY).equals("true");
 		if(properties.get(ConverterConfiguration.FETCHIMAGES_KEY)!=null)
 			downloadImages = properties.get(ConverterConfiguration.FETCHIMAGES_KEY).equals("true");
-		if(properties.get(ConverterConfiguration.TEXTONLY_KEY)!=null) 
+		if(properties.get(ConverterConfiguration.TEXTONLY_KEY)!=null)
 			textOnly = properties.get(ConverterConfiguration.TEXTONLY_KEY).equals("true");
 		for(String imageDir : imagesInputDirectories) {
-			inputImages = new File(inputTempDir + File.separator + imageDir + File.separator);			
+			inputImages = new File(inputTempDir + File.separator + imageDir + File.separator);
 			if(inputImages.exists()) {
 				// there are images to copy
 				prepareImages(inputImages);
 				File outputImages = new File(outputTemp + File.separator + outputImgDir);
 				outputImages.mkdirs();
-				return ImageFetcher.getChangedNode(inputFile, outputImgDir, imgDirRelativeToDoc, 
-									inputImages, outputImages, conversion, 
+				return ImageFetcher.getChangedNode(inputFile, outputImgDir, imgDirRelativeToDoc,
+									inputImages, outputImages, conversion,
 									properties);
 			}
 		}
 		File outputImages = new File(outputTemp + File.separator + outputImgDir);
-		outputImages.mkdirs();		
-		return ImageFetcher.getChangedNode(inputFile, outputImgDir, imgDirRelativeToDoc, 
-								null, outputImages, conversion, 
+		outputImages.mkdirs();
+		return ImageFetcher.getChangedNode(inputFile, outputImgDir, imgDirRelativeToDoc,
+								null, outputImages, conversion,
 								properties);
 	}
 
@@ -1018,7 +1058,7 @@ public class TEIConverter implements Converter,ErrorHandler {
 	 * Setups new URIResolver for XSLT compiler and returns StreamSource of XSL
 	 * transform scheme.
 	 */
-	private StreamSource resolveConfiguration(final String id, 
+	private StreamSource resolveConfiguration(final String id,
 						  XsltCompiler comp, String profile, String direction) throws IOException {
 		comp.setURIResolver(TEIConverterURIResolver
 				.newInstance(ConverterConfiguration.STYLESHEETS_PATH + File.separator + "profiles" + File.separator
