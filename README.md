@@ -30,7 +30,7 @@ NB: For running the image you'll need to have the TEI Stylesheets as well as the
 There are several ways to obtain these (see "Get and install a local copy" at http://www.tei-c.org/Guidelines/P5/),  
 one of them is to download the latest release of both 
 [TEI](https://github.com/TEIC/TEI/releases) and [Stylesheets](https://github.com/TEIC/Stylesheets/releases) from GitHub. 
-Then, the Stylesheets' root directory must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
+Then, the Stylesheets' root directory (i.e. which holds the `profiles` directory) must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
 P5 sources you'll need to find the subdirectory which holds the file `p5subset.xml` and map this to `/usr/share/xml/tei/odd`; (should be `xml/tei/odd`).
 
 ###  without Docker
