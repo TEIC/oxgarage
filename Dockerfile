@@ -81,7 +81,7 @@ RUN mkdir ${CATALINA_WEBAPPS}/ege-webclient \
 
 VOLUME ["/usr/share/xml/tei/stylesheet", "/usr/share/xml/tei/odd"]
 
-EXPOSE 8080
+EXPOSE 8080 8081
 
 ENTRYPOINT ["/my-docker-entrypoint.sh"]
 CMD ["catalina.sh", "run"]
