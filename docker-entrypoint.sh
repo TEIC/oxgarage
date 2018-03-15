@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # setting the webservice URL for the client
-sed -i -e "s@http:\/\/localhost:8080\/ege-webservice\/@$WEBSERVICE_URL@" ${CATALINA_WEBAPPS}/ege-webclient/WEB-INF/web.xml  
+sed -i -e "s@http:\/\/localhost:8080\/ege-webservice\/@$WEBSERVICE_URL@" ${CATALINA_WEBAPPS}/ROOT/WEB-INF/web.xml  
 
 # adding a HTTPS connector.
 # Define the connector on port 8081 to handle

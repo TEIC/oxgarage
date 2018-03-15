@@ -20,7 +20,7 @@ docker run --rm \
     -e WEBSERVICE_URL=http://localhost:8080/ege-webservice/  \
     --name oxgarage teic/oxgarage
 ```
-Once it's running, you can point your browser at `http://localhost:8080/ege-webclient/` for the user interface.
+Once it's running, you can point your browser at `http://localhost:8080/` for the user interface.
 
 #### available parameters
 
@@ -32,6 +32,13 @@ one of them is to download the latest release of both
 [TEI](https://github.com/TEIC/TEI/releases) and [Stylesheets](https://github.com/TEIC/Stylesheets/releases) from GitHub. 
 Then, the Stylesheets' root directory (i.e. which holds the `profiles` directory) must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
 P5 sources you'll need to find the subdirectory which holds the file `p5subset.xml` and map this to `/usr/share/xml/tei/odd`; (should be `xml/tei/odd`).
+
+### exposed ports
+
+The Docker image exposes two ports, 8080 and 8081. If you're running OxGarage over plain old HTTP, use the 8080 connector. 
+For HTTPS connections behind a 
+[SSL terminating Load Balancer](https://creechy.wordpress.com/2011/08/22/ssl-termination-load-balancers-java/), please use the 8081 connector.
+
 
 ###  without Docker
 
