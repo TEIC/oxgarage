@@ -64,9 +64,7 @@ COPY docker-entrypoint.sh /my-docker-entrypoint.sh
 COPY --from=builder /opt/oxgarage-build/ege-webclient/target/ege-webclient.war /tmp/ege-webclient.war
 COPY --from=builder /opt/oxgarage-build/ege-webservice/target/ege-webservice.war /tmp/ege-webservice.war
        
-RUN mkdir ${CATALINA_WEBAPPS}/ege-webclient \
-    && mkdir ${CATALINA_WEBAPPS}/ege-webservice \
-    && rm -Rf ${CATALINA_WEBAPPS}/ROOT \
+RUN rm -Rf ${CATALINA_WEBAPPS}/ROOT \
     && unzip -q /tmp/ege-webclient.war -d ${CATALINA_WEBAPPS}/ROOT/ \
     && unzip -q /tmp/ege-webservice.war -d ${CATALINA_WEBAPPS}/ege-webservice/ \
     && rm /tmp/ege-webclient.war \
