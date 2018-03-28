@@ -1,9 +1,9 @@
 
 <!--
 DTD
-TEI Edition: Version 3.2.0. Last updated on
-	10th July 2017, revision 0fcf651
-TEI Edition Location: http://www.tei-c.org/Vault/P5/Version 3.2.0/
+TEI Edition: Version 3.3.0. Last updated on
+	31st January 2018, revision f4d8439
+TEI Edition Location: http://www.tei-c.org/Vault/P5/Version 3.3.0/
 
 -->
 
@@ -141,6 +141,26 @@ confidence %teidata.probability;  #IMPLIED'>
  %att.ranging.attribute.min;
  %att.ranging.attribute.max;
  %att.ranging.attribute.confidence;'> 
+<!ENTITY % att.dimensions.attribute.unit '
+unit %teidata.enumerated;  #IMPLIED'>
+
+<!ENTITY % att.dimensions.attribute.quantity '
+quantity %teidata.numeric;  #IMPLIED'>
+
+<!ENTITY % att.dimensions.attribute.extent '
+extent %teidata.text;  #IMPLIED'>
+
+<!ENTITY % att.dimensions.attribute.precision '
+precision %teidata.certainty;  #IMPLIED'>
+
+<!ENTITY % att.dimensions.attribute.scope '
+scope %teidata.enumerated;  #IMPLIED'>
+<!ENTITY % att.dimensions.attributes '%att.ranging.attributes;
+ %att.dimensions.attribute.unit;
+ %att.dimensions.attribute.quantity;
+ %att.dimensions.attribute.extent;
+ %att.dimensions.attribute.precision;
+ %att.dimensions.attribute.scope;'> 
 <!ENTITY % att.written.attribute.hand '
 hand %teidata.pointer;  #IMPLIED'>
 <!ENTITY % att.written.attributes '
@@ -313,6 +333,10 @@ nymRef CDATA  #IMPLIED'>
 <!ENTITY % att.naming.attributes '%att.canonical.attributes;
  %att.naming.attribute.role;
  %att.naming.attribute.nymRef;'> 
+<!ENTITY % att.notated.attribute.notation '
+notation %teidata.enumerated;  #IMPLIED'>
+<!ENTITY % att.notated.attributes '
+ %att.notated.attribute.notation;'> 
 <!ENTITY % att.placement.attribute.place '
 place NMTOKENS  #IMPLIED'>
 <!ENTITY % att.placement.attributes '
@@ -887,7 +911,8 @@ type %teidata.enumerated;  #IMPLIED >
  %att.global.attributes;
  %att.transcriptional.attributes;
  %att.placement.attributes;
- %att.typed.attributes; >
+ %att.typed.attributes;
+ %att.dimensions.attributes; >
 <!--doc:(address line) contains one line of a postal address. [3.5.2. Addresses 2.2.4. Publication, Distribution, Licensing, etc. 3.11.2.4. Imprint, Size of a Document, and Reprint Information] -->
 <!ELEMENT addrLine %macro.phraseSeq;>
 <!ATTLIST addrLine xmlns CDATA "http://www.tei-c.org/ns/1.0">
@@ -939,7 +964,7 @@ version %teidata.versionNumber;  #REQUIRED >
 <!ATTLIST availability
  %att.global.attributes;
  %att.declarable.attributes;
-status (free|unknown|restricted) "unknown"  >
+status (free|unknown|restricted) #IMPLIED >
 <!--doc:(back matter) contains any appendixes, etc. following the main part of a text. [4.7. Back Matter 4. Default Text Structure] -->
 <!ELEMENT back (((%model.frontPart;|%model.pLike.front;|%model.pLike;|%model.listLike;|%model.global;)*,(((%model.div1Like;),(%model.frontPart;|%model.div1Like;|%model.global;)*)|((%model.divLike;),(%model.frontPart;|%model.divLike;|%model.global;)*))?,((%model.divBottomPart;),(%model.divBottomPart;|%model.global;)*)?))>
 <!ATTLIST back xmlns CDATA "http://www.tei-c.org/ns/1.0">
@@ -1053,7 +1078,7 @@ Elements] -->
  %att.typed.attributes;
 target CDATA  #IMPLIED >
 <!--doc:groups a number of alternative encodings for the same point in a text. [3.4. Simple Editorial Changes] -->
-<!ELEMENT choice (%model.choicePart;|choice)*>
+<!ELEMENT choice (%model.choicePart;|choice)+>
 <!ATTLIST choice xmlns CDATA "http://www.tei-c.org/ns/1.0">
 <!ATTLIST choice
  %att.global.attributes; >
@@ -1099,7 +1124,7 @@ scheme %teidata.pointer;  #REQUIRED >
 <!ATTLIST correction
  %att.global.attributes;
  %att.declarable.attributes;
-status (high|medium|low|unknown) "unknown" 
+status (high|medium|low|unknown) #IMPLIED
 method (silent|markup) "silent"  >
 <!--doc:(correspondence action) contains a structured description of the place, the name of a person/organization and the date related to the sending/receiving of a message or any other action related to the correspondence. [2.4.6. Correspondence Description] -->
 <!ELEMENT correspAction ((%model.correspActionPart;)+|(%model.pLike;)+)>
@@ -1135,6 +1160,7 @@ type %teidata.enumerated;  #IMPLIED >
 <!ATTLIST date
  %att.global.attributes;
  %att.datable.attributes;
+ %att.dimensions.attributes;
  %att.typed.attributes; >
 <!--doc:contains a brief description of the place, date, time, etc. of production of a letter, newspaper story, or other work, prefixed or suffixed to it as a kind of heading or trailer. [4.2.2. Openers and Closers] -->
 <!ELEMENT dateline (#PCDATA|_DUMMY_model.gLike|%model.phrase;|%model.global;|docDate)*>
@@ -1147,7 +1173,8 @@ type %teidata.enumerated;  #IMPLIED >
 <!ATTLIST del
  %att.global.attributes;
  %att.transcriptional.attributes;
- %att.typed.attributes; >
+ %att.typed.attributes;
+ %att.dimensions.attributes; >
 <!--doc:(description) contains a brief description of the object documented by its parent element, typically a documentation element or an entity. [22.4.1. Description of Components] -->
 <!ELEMENT desc %macro.limitedContent;>
 <!ATTLIST desc xmlns CDATA "http://www.tei-c.org/ns/1.0">
@@ -1355,8 +1382,8 @@ when %teidata.temporal.w3c;  #IMPLIED >
 <!ATTLIST gap
  %att.global.attributes;
  %att.timed.attributes;
+ %att.dimensions.attributes;
 reason NMTOKENS  #IMPLIED
-hand %teidata.pointer;  #IMPLIED
 agent %teidata.enumerated;  #IMPLIED >
 <!--doc:(gathering beginning) marks the beginning of a new gathering or quire in a transcribed codex. [3.10.3. Milestone
 Elements] -->
@@ -1366,7 +1393,8 @@ Elements] -->
  %att.global.attributes;
  %att.typed.attributes;
  %att.spanning.attributes;
- %att.breaking.attributes; >
+ %att.breaking.attributes;
+ %att.edition.attributes; >
 <!--doc:(geographic coordinates declaration) documents the notation and the datum used for geographic coordinates expressed as content of the geo element elsewhere within the document. [2.3.8. The Geographic Coordinates Declaration] -->
 <!ELEMENT geoDecl %macro.phraseSeq;>
 <!ATTLIST geoDecl xmlns CDATA "http://www.tei-c.org/ns/1.0">
@@ -1785,7 +1813,8 @@ marks (none|some|all) #IMPLIED >
 <!ATTLIST quote xmlns CDATA "http://www.tei-c.org/ns/1.0">
 <!ATTLIST quote
  %att.global.attributes;
- %att.typed.attributes; >
+ %att.typed.attributes;
+ %att.notated.attributes; >
 <!--doc:(reference) defines a reference to another location, possibly modified by additional text or comment. [3.6. Simple Links and Cross-References 16.1. Links] -->
 <!ELEMENT ref %macro.paraContent;>
 <!ATTLIST ref xmlns CDATA "http://www.tei-c.org/ns/1.0">
@@ -1865,7 +1894,7 @@ selector %teidata.text;  #IMPLIED >
 <!ATTLIST said
  %att.global.attributes;
  %att.ascribed.attributes;
-aloud %teidata.xTruthValue;  "unknown" 
+aloud %teidata.xTruthValue;  #IMPLIED
 direct %teidata.xTruthValue;  "true"  >
 <!--doc:(salutation) contains a salutation or greeting prefixed to a foreword, dedicatory epistle, or other division of a text, or the salutation in the closing of a letter, preface, etc. [4.2.2. Openers and Closers] -->
 <!ELEMENT salute %macro.paraContent;>
@@ -1999,7 +2028,7 @@ partial %teidata.truthValue;  #IMPLIED >
 <!ATTLIST teiCorpus
  %att.global.attributes;
  %att.typed.attributes;
-version %teidata.version;  "5.0"  >
+version %teidata.version;  #IMPLIED >
 <!ATTLIST teiCorpus xsi:schemaLocation CDATA #IMPLIED
  xmlns:xsi CDATA #FIXED 'http://www.w3.org/2001/XMLSchema-instance'
  >
@@ -2046,6 +2075,7 @@ otherLangs CDATA  #IMPLIED >
 <!ATTLIST time
  %att.global.attributes;
  %att.datable.attributes;
+ %att.dimensions.attributes;
  %att.typed.attributes; >
 <!--doc:contains a title for any kind of work. [3.11.2.2. Titles, Authors, and Editors 2.2.1. The Title Statement 2.2.5. The Series Statement] -->
 <!ELEMENT title %macro.paraContent;>
@@ -2085,8 +2115,8 @@ type %teidata.enumerated;  "main"  >
 <!ATTLIST unclear xmlns CDATA "http://www.tei-c.org/ns/1.0">
 <!ATTLIST unclear
  %att.global.attributes;
-reason CDATA  #IMPLIED
-hand %teidata.pointer;  #IMPLIED
+ %att.dimensions.attributes;
+reason NMTOKENS  #IMPLIED
 agent %teidata.enumerated;  #IMPLIED >
 <!--doc:(non-TEI metadata) provides a container element into which metadata in non-TEI formats may be placed. [2.5. Non-TEI Metadata] -->
 <!ELEMENT xenoData (#PCDATA)*>
