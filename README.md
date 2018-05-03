@@ -12,7 +12,7 @@ Installing
 ### with Docker
 
 If you have Docker installed, you can fetch a readymade image from [Docker Hub](https://hub.docker.com/r/teic/oxgarage/).
-```
+```bash
 docker run --rm \
     -p 8080:8080 \
     -v /your/path/to/Stylesheets:/usr/share/xml/tei/stylesheet \ 
@@ -33,7 +33,7 @@ one of them is to download the latest release of both
 Then, the Stylesheets' root directory (i.e. which holds the `profiles` directory) must be mapped to `/usr/share/xml/tei/stylesheet` whereas for the 
 P5 sources you'll need to find the subdirectory which holds the file `p5subset.xml` and map this to `/usr/share/xml/tei/odd`; (should be `xml/tei/odd`).
 
-### exposed ports
+#### exposed ports
 
 The Docker image exposes two ports, 8080 and 8081. If you're running OxGarage over plain old HTTP, use the 8080 connector. 
 For HTTPS connections behind a 
@@ -42,16 +42,16 @@ For HTTPS connections behind a
 
 ###  without Docker
 
-Application packages (war files) are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/
+Application packages (war files) are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/.
 
- * If you have a running Tomcat (or similar container), you can download  two WAR files from the CI server and install them in the normal way. in this case, you will need to do some configuration manually
+If you have a running Tomcat (or similar container), you can download  two WAR files from the CI server and install them in the normal way. In this case, you will need to do some configuration manually:
 
  1.   copy the file  `ege-webservice/WEB-INF/lib/oxgarage.properties` to `/etc/oxgarage.properties`
  2.   create a directory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
  3.   make the directory owned by the Tomcat user, so that it can create files there: eg `chown -R tomcat6:tomcat6 /var/cache/oxgarage`
  4.   edit the file `webapps/ege-webclient/WEB-INF/web.xml` so that it has the hostname of the server set. eg
-    perl -p -i -e "s/localhost/`hostname -f`/" /var/lib/tomcat6/webapps/ege-webclient/WEB-INF/web.xml
- 5.  make sure the TEI stylesheets and source are installed at `/usr/share/xml/tei` using the Debian file hierarchy standard; the distribution file at https://sourceforge.net/projects/tei/files/Stylesheets/ is in the right layout.
+    ``perl -p -i -e "s/localhost/`hostname -f`/" /var/lib/tomcat6/webapps/ege-webclient/WEB-INF/web.xml``
+ 5.  make sure the TEI stylesheets and source are installed at `/usr/share/xml/tei` using the Debian file hierarchy standard; the distribution files at https://github.com/TEIC/TEI/releases and https://github.com/TEIC/Stylesheets/releases are in the right layout.
 
 You'll probably need to restart your servlet container to make sure these changes take effect.
 
@@ -62,7 +62,9 @@ at `/usr/lib/openoffice/`, but this can be changed if needed
 
 Check the working system by visiting /ege-webclient/ on your Tomcat (or similar) server, and trying an example transformation. You can check the RESTful web server using eg Curl. For example, to convert a TEI XML file to Word format, you might do
 
-    curl -s  -o test.docx -F upload=@test.xml http://localhost:8080/ege-webservice/Conversions/TEI%3Atext%3Axml/docx%3Aapplication%3Avnd.openxmlformats-officedocument.wordprocessingml.document
+```bash
+curl -s  -o test.docx -F upload=@test.xml http://localhost:8080/ege-webservice/Conversions/TEI%3Atext%3Axml/docx%3Aapplication%3Avnd.openxmlformats-officedocument.wordprocessingml.document
+```
 
 Building
 ------
