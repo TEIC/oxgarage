@@ -53,7 +53,8 @@ RUN apt-get update \
     fonts-linuxlibertine \
     fonts-ipafont-gothic \
     fonts-ipafont-mincho \
-    && ln -s ${OFFICE_HOME} /usr/lib/openoffice 
+    && ln -s ${OFFICE_HOME} /usr/lib/openoffice \
+    && rm -rf /var/lib/apt/lists/*
 
 # copy some settings and entrypoint script
 COPY ege-webservice/src/main/webapp/WEB-INF/lib/oxgarage.properties /etc/
