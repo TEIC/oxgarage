@@ -10,6 +10,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.ErrorHandler;
@@ -74,21 +75,18 @@ public class SchemaValidator implements XmlValidator
 			.newInstance("http://www.w3.org/2001/XMLSchema");
 			URL schemaURL = new URL(schemeUrl);
 			//try to download schema by external URL 
-			InputStream urlStream = null;
 			try{
-				urlStream = schemaURL.openStream();
-			}catch(IOException ex){
+				int i = schemaURL.openStream().read();
+			} catch (IOException ex) {
 				// in case of any problem use default schema
-				if(defaultUrl != null){
+				if (defaultUrl != null) {
 					schemaURL = new URL(defaultUrl); 
-					urlStream = schemaURL.openStream();
-				}else{
+				} else {
 					throw ex;
 				}
 			}
 			LOGGER.debug("Uses schema url : " + schemaURL);
-			StreamSource sss = new StreamSource(urlStream);
-			Schema schema =  schemaFactory.newSchema(sss);
+			Schema schema =  schemaFactory.newSchema(schemaURL);
 			spf.setSchema(schema);
 			SAXParser parser = spf.newSAXParser();
 			XMLReader reader = parser.getXMLReader();

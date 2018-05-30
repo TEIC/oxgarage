@@ -1,12 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <validators>
-	<validator format="MASTER" mimeType="text/xml">
-		<dtd systemId="ege_master" root="TEI.2" />
+	<validator name="TEI_All">
+		<schema url="file:///usr/share/xml/tei/odd/Exemplars/tei_all.xsd" 
+                        defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/xsd/tei_all.xsd"/>
+                <rng url="file:///usr/share/xml/tei/odd/Exemplars/tei_all.rng" 
+                     defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/relaxng/tei_all.rng"/>
 	</validator>
-	<validator format="ENRICH" mimeType="text/xml">
-		<scheme url="http://tei.oucs.ox.ac.uk/ENRICH/ODD/RomaResults/enrich.xsd" />
+        <validator name="TEI_Customization">
+                <rng url="file:///usr/share/xml/tei/odd/Exemplars/tei_customization.rng" 
+                     defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/relaxng/tei_customization.rng"
+                     check_id_idref="false"/>
 	</validator>
-	<validator format="EAD" mimeType="text/xml">
-		<dtd systemId="ege_ead" root="ead" />
+        <validator name="TEI_Lite">
+		<schema url="file:///usr/share/xml/tei/odd/Exemplars/tei_lite.xsd" 
+                        defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/xsd/tei_lite.xsd"/>
+                <rng url="file:///usr/share/xml/tei/odd/Exemplars/tei_lite.rng" 
+                     defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/relaxng/tei_lite.rng"/>
+	</validator>
+        <validator name="TEI_ODDs">
+                <rng url="file:///usr/share/xml/tei/odd/Exemplars/tei_odds.rng" 
+                     defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/relaxng/tei_odds.rng"/>
+	</validator>
+        <validator name="TEI_SimplePrint">
+		<schema url="file:///usr/share/xml/tei/odd/Exemplars/tei_simplePrint.xsd" 
+                        deafultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/xsd/tei_simplePrint.xsd"/>
+                <rng url="file:///usr/share/xml/tei/odd/Exemplars/tei_simplePrint.rng" 
+                     defaultUrl="http://www.tei-c.org/Vault/P5/current/xml/tei/custom/schema/relaxng/tei_simplePrint.rng"/>
 	</validator>
 </validators>

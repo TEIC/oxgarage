@@ -172,5 +172,10 @@
       <version>0.3</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+        <groupId>com.thaiopensource</groupId>
+        <artifactId>jing</artifactId>
+        <version>20091111</version>
+    </dependency>
   </dependencies>
 </project>

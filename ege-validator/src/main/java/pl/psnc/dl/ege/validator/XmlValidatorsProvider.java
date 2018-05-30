@@ -14,9 +14,26 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import pl.psnc.dl.ege.types.DataType;
-import pl.psnc.dl.ege.validator.xml.DTDValidator;
+import pl.psnc.dl.ege.validator.xml.RNGValidator;
 import pl.psnc.dl.ege.validator.xml.SchemaValidator;
 import pl.psnc.dl.ege.validator.xml.XmlValidator;
+
+/*
+Requirements:
+For validator, read (by default) http://www.tei-c.org/release/xml/tei/custom/schema/ and list available schemas
+ - On initialization, read the rng and xsd folders, grab schemas prefixed with "tei_", cache them in a local folder
+ - If equivalent copy exists, bon't update
+
+Input customization name and POSTed file to be validated. No uploading schema files
+Schematron validation
+question whether do Relax NG / XSD valiation with Schematron in a single pass or separately
+Roma needs fragment validation
+
+RomaJS could be bundled as a frontend for OxGarage in the OxG Docker distribution
+
+HC will also look at rate-limiting for OxG, since apparently it is abused for batch conversion. 
+
+*/
 
 /**
  * Singleton - prepares available XML validators.<br/>
@@ -27,23 +44,6 @@ import pl.psnc.dl.ege.validator.xml.XmlValidator;
  */
 public class XmlValidatorsProvider extends DefaultHandler {
 
-	/**
-	 * URL suffixes - for default DTD`s and Schema`s paths.
-	 */
-	private static final String EAD_URL_SUFFIX = "!/ead-dtd/ead.dtd";
-
-	private static final String MASTER_URL_SUFFIX = "!/master-dtd/masterx.dtd";
-
-	private static final String TEI_URL_SUFFIX = "!/tei-schema/enrich.xsd";
-
-	/**
-	 * Aliases for EGE default addresses to DTD and Schema
-	 */
-	private static final String TEI_ID = "ege_tei";
-
-	private static final String MASTER_ID = "ege_master";
-
-	private static final String EAD_ID = "ege_ead";
 
 	private static final Logger logger = Logger
 			.getLogger(XmlValidatorsProvider.class);
@@ -52,11 +52,6 @@ public class XmlValidatorsProvider extends DefaultHandler {
 	 * One XML validator for data type.
 	 */
 	private final Map<DataType, XmlValidator> xmlValidators = new HashMap<DataType, XmlValidator>();
-
-	/*
-	 * Temporary data type parsed from configuration file.
-	 */
-	private DataType cDataType;
 
 	/**
 	 * XML configuration : validators element
@@ -74,47 +69,52 @@ public class XmlValidatorsProvider extends DefaultHandler {
 	public static final String A_FORMAT = "format";
 
 	/**
-	 * XML configuration : mimeType attribute
+	 * XML configuration : name attribute
 	 */
-	public static final String A_MIME = "mimeType";
+	public static final String A_NAME = "name";
 
 	/**
 	 * XML configuration : scheme attribute
 	 */
-	public static final String T_SCHEME = "scheme";
+	public static final String T_SCHEMA = "schema";
 
 	/**
-	 * XML configuration : dtd attribute
+	 * XML configuration : Relax NG attribute
 	 */
-	public static final String T_DTD = "dtd";
+	public static final String T_RNG = "rng";
 
 	/**
 	 * XML configuration : url attribute
 	 */
 	public static final String A_URL = "url";
+        
+        public static final String A_DEFAULT = "defaultUrl";
 
 	/**
 	 * XML configuration : root attribute
 	 */
 	public static final String A_ROOT = "root";
+        
+        private String validator;
 
-	/**
-	 * XML configuration : systemId attribute
-	 */
-	public static final String A_SYSTEM_ID = "systemId";
+
 
 	/**
 	 * Informs provider that it has to use default EAD DTD reference (contained
 	 * in .jar file most likely)
 	 */
-	public static final String EGE_EAD = EAD_ID;
 
 	private XmlValidatorsProvider() {
 		try {
+                    /*
+                        Instead, read in directory listing from http://www.tei-c.org/release/xml/tei/custom/schema/relaxng/ 
+                        and–oops— can't do that because even weird stuff has a tei_ prefix. We'll have to have a list
+                    */
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 			xmlReader.setContentHandler(this);
 			xmlReader.parse(new InputSource(this.getClass()
 					.getResourceAsStream("/validators.xml")));
+                        
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 		}
@@ -142,50 +142,30 @@ public class XmlValidatorsProvider extends DefaultHandler {
 			Attributes attributes) throws SAXException {
 		try {
 			if (localName.equals(T_VALIDATOR)) {
-				cDataType = new DataType(attributes.getValue(A_FORMAT),
-						attributes.getValue(A_MIME));
+				validator = attributes.getValue(A_NAME);
 			} else {
-				if (cDataType == null && !localName.equals(T_VALIDATORS)) {
-					throw new SAXException("Unproperly formed validation.xml");
+				if (validator == null && localName.equals(T_VALIDATOR)) {
+					throw new SAXException("Validators must have a @name in validation.xml");
 				}
-				if (localName.equals(T_DTD)) {
-					String systemId = attributes.getValue(A_SYSTEM_ID);
-					if (systemId.indexOf(EAD_ID) > -1) {
-						systemId = generateAliasURL(EAD_URL_SUFFIX);
-					} else if (systemId.equals(MASTER_ID)) {
-						systemId = generateAliasURL(MASTER_URL_SUFFIX);
-					}
-					XmlValidator val = new DTDValidator(systemId, attributes
-							.getValue(A_ROOT));
-					xmlValidators.put(cDataType, val);
-				} else if (localName.equals(T_SCHEME)) {
+				if (localName.equals(T_RNG)) {
+                                        Map<String,String> options = new HashMap<String,String>();
+                                        options.put("check_id_idref", attributes.getValue("check_id_idref"));
+					XmlValidator val = new RNGValidator(
+                                                attributes.getValue(A_URL),
+                                                attributes.getValue(A_DEFAULT),
+                                                options);
+					xmlValidators.put(new DataType(validator + "-RNG", "text/xml"), val);
+				} else if (localName.equals(T_SCHEMA)) {
 					String schemaUrl = attributes.getValue(A_URL);
 					String defaultUrl = null;
-					if (schemaUrl.equals(TEI_ID)) {
-						schemaUrl = generateAliasURL(TEI_URL_SUFFIX);
-					}
-					defaultUrl = generateAliasURL(TEI_URL_SUFFIX);
 					XmlValidator val = new SchemaValidator(schemaUrl,
 							defaultUrl);
-					xmlValidators.put(cDataType, val);
+					xmlValidators.put(new DataType(validator+ "-XSD", "text/xml"), val);
 				}
 			}
 		} catch (Exception ex) {
 			throw new SAXException("Configuration errors occured.");
 		}
-	}
-
-	/*
-	 * Retrieves default URLs of aliases from .jar file 'suffix' marks relative
-	 * path in .jar to gramma file.
-	 */
-	private String generateAliasURL(String suffix) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("jar:file:");
-		sb.append(getClass().getProtectionDomain().getCodeSource()
-				.getLocation().getFile());
-		sb.append(suffix);
-		return sb.toString();
 	}
 
 	/**
