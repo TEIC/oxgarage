@@ -181,7 +181,11 @@ public class ValidationServlet
 					}
 				}
 			}
-		}
+		} else {
+                    ValidationResult result = ege.performValidation(rr.getRequest().getInputStream(), dt);
+                    printValidationResult(response,result);
+                    
+                }
 	}
 	
 	public void printValidationResult(HttpServletResponse response, ValidationResult result) throws IOException{
