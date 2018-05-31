@@ -86,9 +86,9 @@ public class XmlValidatorsProvider extends DefaultHandler {
 	/**
 	 * XML configuration : url attribute
 	 */
-	public static final String A_URL = "url";
+	public static final String A_URL = "local";
         
-        public static final String A_DEFAULT = "defaultUrl";
+        public static final String A_DEFAULT = "remote";
 
 	/**
 	 * XML configuration : root attribute
@@ -156,10 +156,9 @@ public class XmlValidatorsProvider extends DefaultHandler {
                                                 options);
 					xmlValidators.put(new DataType(validator + "-RNG", "text/xml"), val);
 				} else if (localName.equals(T_SCHEMA)) {
-					String schemaUrl = attributes.getValue(A_URL);
-					String defaultUrl = null;
-					XmlValidator val = new SchemaValidator(schemaUrl,
-							defaultUrl);
+					XmlValidator val = new SchemaValidator(
+                                                attributes.getValue(A_URL),
+                                                attributes.getValue(A_DEFAULT));
 					xmlValidators.put(new DataType(validator+ "-XSD", "text/xml"), val);
 				}
 			}

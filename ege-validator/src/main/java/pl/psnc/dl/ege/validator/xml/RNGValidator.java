@@ -12,6 +12,7 @@ import com.thaiopensource.validate.ValidationDriver;
 import com.thaiopensource.validate.auto.AutoSchemaReader;
 import com.thaiopensource.validate.prop.rng.RngProperty;
 import com.thaiopensource.xml.sax.ErrorHandlerImpl;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -59,20 +60,14 @@ public class RNGValidator implements XmlValidator {
         localOptions.add(this.options.toPropertyMap());
         localOptions.put(ValidateProperty.ERROR_HANDLER, errorHandler);
         ValidationDriver driver = new ValidationDriver(localOptions.toPropertyMap(), sr);
-        URL schemaURL = new URL(schemaUrl);
-        InputStream urlStream = null;
-        try {
-            urlStream = schemaURL.openStream();
-        } catch (IOException ex) {
-            // in case of any problem use default schema
-            if (defaultUrl != null){
-                schemaURL = new URL(defaultUrl); 
-                urlStream = schemaURL.openStream();
-            } else {
-                throw ex;
-            }
+        File localSchema = new File(schemaUrl);
+        URL schemaURL = null;
+        if (localSchema.exists()) {
+            schemaURL = localSchema.toURI().toURL();
+        } else {
+            schemaURL = new URL(defaultUrl);
         }
-        driver.loadSchema(new InputSource(urlStream));
+        driver.loadSchema(new InputSource(schemaURL.openStream()));
         driver.validate(new InputSource(inputData));
     }
 

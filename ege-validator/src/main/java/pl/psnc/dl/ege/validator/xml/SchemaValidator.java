@@ -1,5 +1,6 @@
 package pl.psnc.dl.ege.validator.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -53,6 +54,7 @@ public class SchemaValidator implements XmlValidator
 	public SchemaValidator(String schemeUrl, String defaultUrl){
 		this(schemeUrl);
 		this.defaultUrl = defaultUrl;	
+                System.out.println(schemeUrl + ", " + defaultUrl);
 	}
 	
 	
@@ -73,18 +75,13 @@ public class SchemaValidator implements XmlValidator
 		try {
 			SchemaFactory schemaFactory = SchemaFactory
 			.newInstance("http://www.w3.org/2001/XMLSchema");
-			URL schemaURL = new URL(schemeUrl);
-			//try to download schema by external URL 
-			try{
-				int i = schemaURL.openStream().read();
-			} catch (IOException ex) {
-				// in case of any problem use default schema
-				if (defaultUrl != null) {
-					schemaURL = new URL(defaultUrl); 
-				} else {
-					throw ex;
-				}
-			}
+                        File localSchema = new File(schemeUrl);
+                        URL schemaURL = null;
+                        if (localSchema.exists()) {
+                            schemaURL = localSchema.toURI().toURL();
+                        } else {
+                            schemaURL = new URL(defaultUrl);
+                        }
 			LOGGER.debug("Uses schema url : " + schemaURL);
 			Schema schema =  schemaFactory.newSchema(schemaURL);
 			spf.setSchema(schema);
