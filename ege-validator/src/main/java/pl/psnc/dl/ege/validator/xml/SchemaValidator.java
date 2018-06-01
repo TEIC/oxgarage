@@ -3,6 +3,7 @@ package pl.psnc.dl.ege.validator.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,28 +34,30 @@ public class SchemaValidator implements XmlValidator
 	
 	private static final Logger LOGGER = Logger.getLogger(SchemaValidator.class);
 	
-	private final String schemeUrl;
-	
-	private String defaultUrl = null;
-	
+        private final Schema schema;
+		
 	/**
 	 * Default constructor.<br> 
 	 * Sets {@link StandardErrorHandler} as default error handler.
 	 * 
 	 * @param schemeUrl - URL reference to XML Scheme
 	 */
-	public SchemaValidator(String schemeUrl){
-		if(schemeUrl == null){
-			throw new IllegalArgumentException();
-		}
-		this.schemeUrl = schemeUrl;
+	public SchemaValidator(String schemeUrl) throws SAXException, MalformedURLException {
+		this(schemeUrl, null);
 	}
 	
 	
-	public SchemaValidator(String schemeUrl, String defaultUrl){
-		this(schemeUrl);
-		this.defaultUrl = defaultUrl;	
-                System.out.println(schemeUrl + ", " + defaultUrl);
+	public SchemaValidator(String schemeUrl, String defaultUrl) throws SAXException, MalformedURLException {
+            File f = new File(schemeUrl);
+            URL schemaURL;
+            if (f.exists()) {
+                schemaURL = f.toURI().toURL();
+            } else {
+                schemaURL = new URL(defaultUrl);
+            }
+            SchemaFactory schemaFactory = SchemaFactory
+			.newInstance("http://www.w3.org/2001/XMLSchema");
+            this.schema = schemaFactory.newSchema(schemaURL);
 	}
 	
 	
@@ -75,16 +78,7 @@ public class SchemaValidator implements XmlValidator
 		try {
 			SchemaFactory schemaFactory = SchemaFactory
 			.newInstance("http://www.w3.org/2001/XMLSchema");
-                        File localSchema = new File(schemeUrl);
-                        URL schemaURL = null;
-                        if (localSchema.exists()) {
-                            schemaURL = localSchema.toURI().toURL();
-                        } else {
-                            schemaURL = new URL(defaultUrl);
-                        }
-			LOGGER.debug("Uses schema url : " + schemaURL);
-			Schema schema =  schemaFactory.newSchema(schemaURL);
-			spf.setSchema(schema);
+			spf.setSchema(this.schema);
 			SAXParser parser = spf.newSAXParser();
 			XMLReader reader = parser.getXMLReader();
 			reader.setErrorHandler(errorHandler);

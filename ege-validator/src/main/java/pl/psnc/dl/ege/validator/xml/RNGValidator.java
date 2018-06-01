@@ -5,23 +5,27 @@
  */
 package pl.psnc.dl.ege.validator.xml;
 
+import com.thaiopensource.util.PropertyMap;
 import com.thaiopensource.util.PropertyMapBuilder;
+import com.thaiopensource.validate.IncorrectSchemaException;
+import com.thaiopensource.validate.Schema;
 import com.thaiopensource.validate.SchemaReader;
 import com.thaiopensource.validate.ValidateProperty;
-import com.thaiopensource.validate.ValidationDriver;
+import com.thaiopensource.validate.Validator;
 import com.thaiopensource.validate.auto.AutoSchemaReader;
 import com.thaiopensource.validate.prop.rng.RngProperty;
-import com.thaiopensource.xml.sax.ErrorHandlerImpl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.Map;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.apache.log4j.Logger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  *
@@ -29,46 +33,53 @@ import org.xml.sax.SAXException;
  */
 public class RNGValidator implements XmlValidator {
     
-    private static final Logger LOGGER = Logger.getLogger(SchemaValidator.class);
-    private final String schemaUrl;
-    private String defaultUrl = null;
-    private PropertyMapBuilder options = new PropertyMapBuilder();
+    private static final Logger LOGGER = Logger.getLogger(RNGValidator.class);
+    private final Schema schema;
     
     
-    public RNGValidator(String url) {
+    public RNGValidator(String url) throws 
+            IOException, SAXException, IncorrectSchemaException {
+       this(url, null, null);
+    }
+    
+    public RNGValidator(String url, String defaultUrl) throws 
+            IOException, SAXException, IncorrectSchemaException {
+        this(url, defaultUrl, null);
+    }
+    
+    public RNGValidator(String url, String defaultUrl, Map options) throws 
+            IOException, SAXException, IncorrectSchemaException {
+        PropertyMapBuilder pmb = new PropertyMapBuilder();
+        if (options != null) {
+            if ("false".equals(options.get("check_id_idref"))) {
+                pmb.put(RngProperty.CHECK_ID_IDREF, null);
+            }
+        }
         if (url == null) {
             throw new IllegalArgumentException("Schema URL cannot be null.");
         }
-        this.schemaUrl = url;
-    }
-    
-    public RNGValidator(String url, String defaultUrl) {
-        this(url);
-        this.defaultUrl = defaultUrl;
-    }
-    
-    public RNGValidator(String url, String defaultUrl, Map options) {
-        this(url, defaultUrl);
-        if ("false".equals(options.get("check_id_idref"))) {
-            this.options.put(RngProperty.CHECK_ID_IDREF, null);
-        }
-    }
-    
-    public void validateXml(InputStream inputData, ErrorHandler errorHandler) throws SAXException, IOException, Exception {
-        SchemaReader sr = new AutoSchemaReader();
-        PropertyMapBuilder localOptions = new PropertyMapBuilder();
-        localOptions.add(this.options.toPropertyMap());
-        localOptions.put(ValidateProperty.ERROR_HANDLER, errorHandler);
-        ValidationDriver driver = new ValidationDriver(localOptions.toPropertyMap(), sr);
-        File localSchema = new File(schemaUrl);
-        URL schemaURL = null;
-        if (localSchema.exists()) {
-            schemaURL = localSchema.toURI().toURL();
+        File f = new File(url);
+        URL schemaURL;
+        if (f.exists()) {
+            schemaURL = f.toURI().toURL();
         } else {
             schemaURL = new URL(defaultUrl);
         }
-        driver.loadSchema(new InputSource(schemaURL.openStream()));
-        driver.validate(new InputSource(inputData));
+        SchemaReader sr = new AutoSchemaReader();
+        this.schema = sr.createSchema(new InputSource(schemaURL.openStream()), pmb.toPropertyMap());
+    }
+    
+    public void validateXml(InputStream inputData, ErrorHandler errorHandler) 
+            throws SAXException, IOException, Exception {
+        Validator v = schema.createValidator(PropertyMap.EMPTY);
+        SAXParserFactory spf = SAXParserFactory.newInstance();
+        spf.setValidating(false);
+        spf.setNamespaceAware(true);
+        SAXParser parser = spf.newSAXParser();
+        XMLReader reader = parser.getXMLReader();
+        reader.setContentHandler(v.getContentHandler());
+        reader.setErrorHandler(errorHandler);
+        reader.parse(new InputSource(inputData));
     }
 
 }
