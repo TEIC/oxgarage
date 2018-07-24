@@ -42,9 +42,26 @@ For HTTPS connections behind a
 
 ###  without Docker
 
-Application packages (war files) are available from the TEI's continuous integration (CI) server at http://jenkins.tei-c.org/job/OxGarage/.
+#### Getting the application packages
 
-If you have a running Tomcat (or similar container), you can download  two WAR files from the CI server and install them in the normal way. In this case, you will need to do some configuration manually:
+Application packages (WAR files) are available from the [OxGarage release page](https://github.com/TEIC/oxgarage/releases). These can also be extracted from the Docker image (e.g. when you want to test the dev version) by calling 
+
+```bash
+docker run --rm -v $(pwd)/tmp:/tmp teic/oxgarage sh -c "cp -r /usr/local/tomcat/webapps/ege-webservice /usr/local/tomcat/webapps/ROOT /tmp/"
+```
+
+which will copy the two folders `ROOT` and `ege-webservice` to a (newly created) subdirectory `tmp` in the current directory. If you further need to package these folders as WAR files run the two commands fom the current directory:
+
+```bash
+jar -cfv tmp/ege-webclient.war -C tmp/ROOT .  
+jar -cfv tmp/ege-webservice.war -C tmp/ege-webservice .
+```
+
+NB: You will need to have Docker installed as well as a JavaJDK for the above commands to work. 
+
+#### Running the application packages
+
+If you have a running Tomcat (or similar container), you can install the WAR files (see above) in the normal way. In this case, you will need to do some configuration manually:
 
  1.   copy the file  `ege-webservice/WEB-INF/lib/oxgarage.properties` to `/etc/oxgarage.properties`
  2.   create a directory `/var/cache/oxgarage` and copy the file `log4j.xml` to there
