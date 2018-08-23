@@ -1,7 +1,7 @@
 #########################################
 # multi stage Dockerfile for creating a Docker image
 # 1. set up the build environment and build the war files
-# 2. install a Jetty server with the web applications from 1
+# 2. run an application server with the web applications from 1
 #########################################
 FROM maven:3 as builder
 LABEL maintainer="Peter Stadler for the TEI Council"
@@ -33,7 +33,7 @@ RUN mvn install:install-file -DgroupId=jpf-tools -DartifactId=jpf-tools -Dversio
     && mvn install
 
 #########################################
-# Now installing the Jetty server
+# Now configuring the application server
 # and adding our freshly built war packages
 #########################################
 FROM tomcat:7
@@ -71,13 +71,6 @@ RUN rm -Rf ${CATALINA_WEBAPPS}/ROOT \
     && rm /tmp/ege-webclient.war \
     && rm /tmp/ege-webservice.war \
     && chmod 755 /my-docker-entrypoint.sh
-
-# set rights for the jetty user who will run the services
-#RUN chown -R jetty:jetty \
-#    /var/cache/oxgarage \
-#    ${CATALINA_WEBAPPS}/* \
-#    /my-docker-entrypoint.sh \
-#    && chmod 755 /my-docker-entrypoint.sh
 
 VOLUME ["/usr/share/xml/tei/stylesheet", "/usr/share/xml/tei/odd"]
 
