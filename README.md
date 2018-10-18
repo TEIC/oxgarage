@@ -2,7 +2,7 @@ OxGarage
 ========
 
 
-[![Build Status](https://travis-ci.com/teic/oxgarage.svg?branch=dev)](https://travis-ci.com/teic/oxgarage)
+[![Build Status](https://travis-ci.com/TEIC/oxgarage.svg?branch=dev)](https://travis-ci.com/TEIC/oxgarage)
 [![GitHub](https://img.shields.io/github/license/teic/oxgarage.svg)](https://github.com/TEIC/oxgarage/blob/dev/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/teic/oxgarage.svg)](https://github.com/TEIC/oxgarage/releases)
 [![Docker Automated build](https://img.shields.io/docker/automated/teic/oxgarage.svg)](https://hub.docker.com/r/teic/oxgarage/)
