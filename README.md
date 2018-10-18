@@ -1,6 +1,13 @@
 OxGarage
 ========
 
+
+[![Build Status](https://travis-ci.com/teic/oxgarage.svg?branch=dev)](https://travis-ci.com/teic/oxgarage)
+[![GitHub](https://img.shields.io/github/license/teic/oxgarage.svg)](https://github.com/TEIC/oxgarage/blob/dev/LICENSE)
+[![Docker Automated build](https://img.shields.io/docker/automated/teic/oxgarage.svg)](https://hub.docker.com/r/teic/oxgarage/)
+[![Docker Build Status](https://img.shields.io/docker/build/teic/oxgarage.svg)](https://hub.docker.com/r/teic/oxgarage/)
+
+
 OxGarage is a web, and RESTful, service to manage the transformation of documents between a variety of formats. The majority of transformations use Text Encoding Initiative XML as a pivot format, and Libre/Open Office to read some binary document formats
 
 OxGarage is based on the Enrich Garage Engine (https://sourceforge.net/projects/enrich-ege/)
