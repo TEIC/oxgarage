@@ -1,5 +1,12 @@
 language: java
 
+matrix:
+  include:
+    - jdk: openjdk7
+    - jdk: openjdk8
+    - jdk: openjdk9
+    - jdk: openjdk10
+    
 before_install:
     - mvn install:install-file -DgroupId=jpf-tools -DartifactId=jpf-tools -Dversion=1.5.1 -Dpackaging=jar -Dfile=jpf-tools.jar
     - mvn install:install-file -DgroupId=com.artofsolving -DartifactId=jodconverter -Dversion=3.0-beta-4 -Dpackaging=jar -Dfile=jod-lib/jodconverter-core-3.0-beta-4.jar
