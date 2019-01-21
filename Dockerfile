@@ -3,7 +3,7 @@
 # 1. set up the build environment and build the war files
 # 2. run an application server with the web applications from 1
 #########################################
-FROM maven:3 as builder
+FROM maven:3-jdk-8 as builder
 LABEL maintainer="Peter Stadler for the TEI Council"
 
 ENV OXGARAGE_BUILD_HOME="/opt/oxgarage-build"
