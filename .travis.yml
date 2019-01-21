@@ -4,8 +4,6 @@ matrix:
   include:
     - jdk: openjdk7
     - jdk: openjdk8
-    - jdk: openjdk9
-    - jdk: openjdk10
     
 before_install:
     - mvn install:install-file -DgroupId=jpf-tools -DartifactId=jpf-tools -Dversion=1.5.1 -Dpackaging=jar -Dfile=jpf-tools.jar
