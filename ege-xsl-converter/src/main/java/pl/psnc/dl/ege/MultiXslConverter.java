@@ -257,7 +257,9 @@ public class MultiXslConverter implements ConfigurableConverter {
 					throw ex;
 				}
 			}
-			XsltExecutable exec = comp.compile(new StreamSource(is));
+			StreamSource xslSource = new StreamSource(is);
+			xslSource.setSystemId(xslUri.toString());
+			XsltExecutable exec = comp.compile(xslSource);
 			XsltTransformer transformer = exec.load();
 			DocumentBuilder documentBuilder = proc.newDocumentBuilder();
 			documentBuilder.setDTDValidation(false);
