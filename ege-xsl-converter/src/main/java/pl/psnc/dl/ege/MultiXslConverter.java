@@ -342,7 +342,7 @@ public class MultiXslConverter implements ConfigurableConverter {
 
 	public void configure(Map<String, String> params) throws EGEException {
 		try {
-			xslUri = new File(STYLESHEETS_PATH + File.separator +params.get("xsluri")).toURI();
+			xslUri = new File(STYLESHEETS_PATH +params.get("xsluri")).toURI();
 			String iFormat = params.get("iFormat");
 			StringBuffer sb = new StringBuffer();
 			sb.append("jar:file:");
