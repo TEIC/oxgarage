@@ -8,7 +8,7 @@ LABEL maintainer="Peter Stadler for the TEI Council"
 
 ENV OXGARAGE_BUILD_HOME="/opt/oxgarage-build"
 
-ARG SAXON_URL="https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.8/SaxonHE9-8-0-7J.zip" 
+ARG SAXON_URL="https://downloads.sourceforge.net/project/saxon/Saxon-HE/9.8/SaxonHE9-8-0-15J.zip" 
 
 ADD ${SAXON_URL} /tmp/saxon.zip
 
