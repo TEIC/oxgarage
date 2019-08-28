@@ -1,3 +1,7 @@
+# need to stick with trusty because 
+# openjdks fail to install on xenial
+dist: trusty
+
 language: java
 
 matrix:
