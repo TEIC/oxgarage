@@ -44,12 +44,12 @@ ENV OFFICE_HOME /usr/lib/libreoffice
 USER root:root
 
 RUN apt-get update \
-    && apt-get install -y --force-yes libreoffice \
+    && apt-get install -y libreoffice \
     ttf-dejavu \
     fonts-arphic-ukai \
     fonts-arphic-uming \
-    ttf-baekmuk \
-    ttf-junicode \
+    fonts-baekmuk \
+    fonts-junicode \
     fonts-linuxlibertine \
     fonts-ipafont-gothic \
     fonts-ipafont-mincho \
