@@ -6,7 +6,7 @@
   <packaging>pom</packaging>
   <version>0.5.0</version>
   <name>Enrich Garage Engine</name>
-  <url>http://oxgarage.oucs.ox.ac.uk:8080/</url>
+  <url>https://oxgarage.tei-c.org/</url>
   <licenses>
     <license>
       <name>GPL</name>
